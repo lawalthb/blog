@@ -1,333 +1,521 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Blog Admin Dashboard</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Awesome Blog</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Vue 3 CDN -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <!-- Font Awesome -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  </head>
-  <body class="bg-gray-100">
-    <div id="app" class="min-h-screen flex">
-      <!-- Sidebar -->
-      <aside class="w-64 bg-gray-800 text-white">
-        <div class="p-4 border-b border-gray-700">
-          <h2 class="text-2xl font-bold">Blog Admin</h2>
-        </div>
-        <nav class="p-2">
-          <ul>
-            <li class="mb-1">
-              <a
-                href="index.html"
-                class="block px-4 py-2 rounded hover:bg-gray-700 bg-gray-700">
-                <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
-              </a>
-            </li>
-            <li class="mb-1">
-              <a
-                href="posts.html"
-                class="block px-4 py-2 rounded hover:bg-gray-700">
-                <i class="fas fa-file-alt mr-2"></i> Posts
-              </a>
-            </li>
-            <li class="mb-1">
-              <a
-                href="categories.html"
-                class="block px-4 py-2 rounded hover:bg-gray-700">
-                <i class="fas fa-folder mr-2"></i> Categories
-              </a>
-            </li>
-            <li class="mb-1">
-              <a
-                href="tags.html"
-                class="block px-4 py-2 rounded hover:bg-gray-700">
-                <i class="fas fa-tags mr-2"></i> Tags
-              </a>
-            </li>
-            <li class="mb-1">
-              <a
-                href="comments.html"
-                class="block px-4 py-2 rounded hover:bg-gray-700">
-                <i class="fas fa-comments mr-2"></i> Comments
-              </a>
-            </li>
-            <li class="mb-1">
-              <a
-                href="media.html"
-                class="block px-4 py-2 rounded hover:bg-gray-700">
-                <i class="fas fa-images mr-2"></i> Media
-              </a>
-            </li>
-            <li class="mb-1">
-              <a
-                href="users.html"
-                class="block px-4 py-2 rounded hover:bg-gray-700">
-                <i class="fas fa-users mr-2"></i> Users
-              </a>
-            </li>
-
-            <li class="mb-1">
-              <a
-                href="settings.html"
-                class="block px-4 py-2 rounded hover:bg-gray-700">
-                <i class="fas fa-cog mr-2"></i> Settings
-              </a>
-            </li>
-          </ul>
-        </nav>
-      </aside>
-
-      <!-- Main Content -->
-      <main class="flex-1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="min-h-screen flex flex-col">
         <!-- Header -->
-        <header class="bg-white shadow p-4 flex justify-between items-center">
-          <h1 class="text-xl font-semibold">Dashboard</h1>
-          <div class="flex items-center">
-            <span class="mr-4">Welcome, Admin</span>
-            <button
-              @click="logout"
-              class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
-              <i class="fas fa-sign-out-alt mr-1"></i> Logout
-            </button>
-          </div>
+        <header class="bg-white shadow-md">
+            <div class="container mx-auto px-4 py-6">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                        <a href="index.html" class="text-2xl font-bold text-gray-800">My Awesome Blog</a>
+                    </div>
+                    <div>
+                        <nav class="flex space-x-6">
+                            <a href="index.html" class="text-gray-800 hover:text-blue-600 font-medium">Home</a>
+                            <a href="#" class="text-gray-600 hover:text-blue-600">Categories</a>
+                            <a href="#" class="text-gray-600 hover:text-blue-600">About</a>
+                            <a href="#" class="text-gray-600 hover:text-blue-600">Contact</a>
+                        </nav>
+                    </div>
+                    <div>
+                        <div class="relative">
+                            <input type="text" v-model="searchQuery" placeholder="Search..."
+                                class="border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64">
+                            <button class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </header>
 
-        <!-- Dashboard Content -->
-        <div class="p-6">
-          <div
-            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            <!-- Stats Cards -->
-            <div class="bg-white rounded-lg shadow p-4 flex items-center">
-              <div class="rounded-full bg-blue-100 p-3 mr-4">
-                <i class="fas fa-file-alt text-blue-500 text-xl"></i>
-              </div>
-              <div>
-                <h3 class="text-2xl font-bold">{{ stats.posts }}</h3>
-                <p class="text-gray-500">Total Posts</p>
-              </div>
-            </div>
-
-            <div class="bg-white rounded-lg shadow p-4 flex items-center">
-              <div class="rounded-full bg-green-100 p-3 mr-4">
-                <i class="fas fa-comments text-green-500 text-xl"></i>
-              </div>
-              <div>
-                <h3 class="text-2xl font-bold">{{ stats.comments }}</h3>
-                <p class="text-gray-500">Comments</p>
-              </div>
-            </div>
-
-            <div class="bg-white rounded-lg shadow p-4 flex items-center">
-              <div class="rounded-full bg-purple-100 p-3 mr-4">
-                <i class="fas fa-users text-purple-500 text-xl"></i>
-              </div>
-              <div>
-                <h3 class="text-2xl font-bold">{{ stats.users }}</h3>
-                <p class="text-gray-500">Users</p>
-              </div>
-            </div>
-
-            <div class="bg-white rounded-lg shadow p-4 flex items-center">
-              <div class="rounded-full bg-yellow-100 p-3 mr-4">
-                <i class="fas fa-eye text-yellow-500 text-xl"></i>
-              </div>
-              <div>
-                <h3 class="text-2xl font-bold">{{ stats.views }}</h3>
-                <p class="text-gray-500">Total Views</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Recent Posts -->
-          <div class="bg-white rounded-lg shadow mb-6">
-            <div class="border-b px-4 py-3 flex justify-between items-center">
-              <h2 class="text-lg font-semibold">Recent Posts</h2>
-              <a href="posts.html" class="text-blue-500 hover:underline"
-                >View All</a
-              >
-            </div>
-            <div class="p-4">
-              <table class="w-full">
-                <thead>
-                  <tr class="text-left text-gray-500 border-b">
-                    <th class="pb-2">Title</th>
-                    <th class="pb-2">Author</th>
-                    <th class="pb-2">Category</th>
-                    <th class="pb-2">Date</th>
-                    <th class="pb-2">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="post in recentPosts"
-                    :key="post.id"
-                    class="border-b">
-                    <td class="py-3 pr-2">{{ post.title }}</td>
-                    <td class="py-3 pr-2">{{ post.author }}</td>
-                    <td class="py-3 pr-2">{{ post.category }}</td>
-                    <td class="py-3 pr-2">{{ post.date }}</td>
-                    <td class="py-3">
-                      <span
-                        :class="getStatusClass(post.status)"
-                        class="px-2 py-1 rounded text-xs">
-                        {{ post.status }}
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Recent Comments -->
-          <div class="bg-white rounded-lg shadow">
-            <div class="border-b px-4 py-3 flex justify-between items-center">
-              <h2 class="text-lg font-semibold">Recent Comments</h2>
-              <a href="comments.html" class="text-blue-500 hover:underline"
-                >View All</a
-              >
-            </div>
-            <div class="p-4">
-              <div
-                v-for="comment in recentComments"
-                :key="comment.id"
-                class="border-b last:border-0 py-3">
-                <div class="flex items-start">
-                  <div
-                    class="w-10 h-10 rounded-full bg-gray-300 mr-3 flex-shrink-0"></div>
-                  <div>
-                    <div class="flex items-center mb-1">
-                      <h4 class="font-medium mr-2">{{ comment.author }}</h4>
-                      <span class="text-sm text-gray-500"
-                        >on "{{ comment.post }}"</span
-                      >
+        <!-- Featured Post -->
+        <section class="container mx-auto px-4 py-8" v-if="featuredPost">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="md:flex">
+                    <div class="md:w-1/2">
+                        <img :src="featuredPost.featuredImage || 'https://via.placeholder.com/800x500'"
+                            :alt="featuredPost.title" class="w-full h-full object-cover">
                     </div>
-                    <p class="text-gray-600 mb-2">{{ comment.content }}</p>
-                    <div class="flex text-sm">
-                      <button class="text-blue-500 hover:underline mr-3">
-                        Approve
-                      </button>
-                      <button class="text-red-500 hover:underline mr-3">
-                        Reject
-                      </button>
-                      <button class="text-gray-500 hover:underline">
-                        Reply
-                      </button>
+                    <div class="md:w-1/2 p-6 md:p-8">
+                        <div class="flex items-center text-sm text-gray-600 mb-2">
+                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs mr-2">Featured</span>
+                            <span>{{ featuredPost.date }}</span>
+                        </div>
+                        <h2 class="text-3xl font-bold mb-4 text-gray-800">{{ featuredPost.title }}</h2>
+                        <p class="text-gray-600 mb-6">{{ featuredPost.excerpt }}</p>
+                        <div class="flex items-center text-sm text-gray-600 mb-6">
+                            <div class="mr-4">
+                                <i class="fas fa-user mr-1"></i> {{ featuredPost.author }}
+                            </div>
+                            <div class="mr-4">
+                                <i class="fas fa-folder mr-1"></i> {{ featuredPost.category }}
+                            </div>
+                            <div class="mr-4">
+                                <i class="fas fa-comments mr-1"></i> {{ featuredPost.comments ? featuredPost.comments.length : 0 }}
+                            </div>
+                        </div>
+                        <a :href="'post.html?id=' + featuredPost.id" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-lg">
+                            Read More
+                        </a>
                     </div>
-                  </div>
                 </div>
-              </div>
             </div>
-          </div>
-        </div>
-      </main>
+        </section>
+
+        <!-- Latest Posts -->
+        <section class="container mx-auto px-4 py-8">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-bold text-gray-800">Latest Posts</h2>
+                <div class="flex space-x-2">
+                    <select v-model="categoryFilter" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">All Categories</option>
+                        <option v-for="category in categories" :key="category" :value="category">{{ category }}</option>
+                    </select>
+                    <select v-model="sortBy" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="date">Latest</option>
+                        <option value="views">Most Viewed</option>
+                        <option value="likes">Most Liked</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div v-for="post in filteredPosts" :key="post.id" class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <a :href="'post.html?id=' + post.id" class="block">
+                        <img :src="post.featuredImage || 'https://via.placeholder.com/400x250'" :alt="post.title"
+                            class="w-full h-48 object-cover">
+                    </a>
+                    <div class="p-6">
+                        <div class="flex items-center text-sm text-gray-600 mb-2">
+                            <span>{{ post.date }}</span>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2 text-gray-800">
+                            <a :href="'post.html?id=' + post.id" class="hover:text-blue-600">{{ post.title }}</a>
+                        </h3>
+                        <p class="text-gray-600 mb-4">{{ post.excerpt }}</p>
+                        <div class="flex items-center text-sm text-gray-600 mb-4">
+                            <div class="mr-4">
+                                <i class="fas fa-user mr-1"></i> {{ post.author }}
+                            </div>
+                            <div class="mr-4">
+                                <i class="fas fa-eye mr-1"></i> {{ post.views }}
+                            </div>
+                            <div>
+                                <i class="fas fa-thumbs-up text-green-600 mr-1"></i> {{ post.likes }}
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap">
+                            <span v-for="tag in post.tags" :key="tag"
+                                class="px-2 py-1 mr-2 mb-2 text-xs rounded-full bg-blue-100 text-blue-800">
+                                {{ tag }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="mt-12 flex justify-center">
+                <nav class="inline-flex rounded-md shadow">
+                    <button @click="prevPage" :disabled="currentPage === 1"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                        Previous
+                    </button>
+                    <button v-for="page in displayedPages" :key="page"
+                        @click="goToPage(page)"
+                        :class="[
+                            'px-4 py-2 text-sm font-medium border border-gray-300',
+                            currentPage === page
+                                ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                                : 'text-gray-700 bg-white hover:bg-gray-50'
+                        ]">
+                        {{ page }}
+                    </button>
+                    <button @click="nextPage" :disabled="currentPage >= totalPages"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                        Next
+                    </button>
+                </nav>
+            </div>
+        </section>
+
+        <!-- Newsletter -->
+        <section class="bg-blue-600 text-white py-12">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-2xl font-bold mb-4">Subscribe to Our Newsletter</h2>
+                <p class="mb-6 max-w-2xl mx-auto">Stay updated with our latest articles, news, and tips delivered straight to your inbox.</p>
+                <div class="max-w-md mx-auto flex">
+                    <input type="email" v-model="newsletterEmail" placeholder="Your email address"
+                        class="flex-grow px-4 py-2 rounded-l-lg text-gray-800 focus:outline-none">
+                    <button @click="subscribeNewsletter" class="bg-gray-800 hover:bg-gray-900 px-6 py-2 rounded-r-lg">
+                        Subscribe
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 text-white py-8 mt-auto">
+            <div class="container mx-auto px-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">About Us</h3>
+                        <p class="text-gray-400">My Awesome Blog is a platform dedicated to sharing knowledge about technology, travel, and lifestyle.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Categories</h3>
+                        <ul class="space-y-2 text-gray-400">
+                            <li v-for="category in categories" :key="category">
+                                <a href="#" class="hover:text-white">{{ category }}</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                        <ul class="space-y-2 text-gray-400">
+                            <li><a href="#" class="hover:text-white">Home</a></li>
+                            <li><a href="#" class="hover:text-white">About</a></li>
+                            <li><a href="#" class="hover:text-white">Contact</a></li>
+                            <li><a href="#" class="hover:text-white">Privacy Policy</a></li>
+                            <li><a href="#" class="hover:text-white">Terms of Service</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Follow Us</h3>
+                        <div class="flex space-x-4">
+                            <a href="#" class="text-gray-400 hover:text-white text-xl">
+                                <i class="fab fa-facebook"></i>
+                            </a>
+                            <a href="#" class="text-gray-400 hover:text-white text-xl">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="text-gray-400 hover:text-white text-xl">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="#" class="text-gray-400 hover:text-white text-xl">
+                                <i class="fab fa-linkedin"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
+                    <p>&copy; 2023 My Awesome Blog. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
     </div>
 
     <script>
-      const { createApp, ref } = Vue;
+        const { createApp, ref, computed, onMounted } = Vue;
 
-      createApp({
-        setup() {
-          const stats = ref({
-            posts: 125,
-            comments: 42,
-            users: 843,
-            views: 25632,
-          });
+        createApp({
+            setup() {
+                // Data
+                const posts = ref([
+                    {
+                        id: 1,
+                        title: 'Getting Started with Vue 3',
+                        author: 'John Doe',
+                        category: 'Development',
+                        tags: ['Vue', 'JavaScript', 'Frontend'],
+                        date: 'June 15, 2023',
+                        status: 'published',
+                        content: 'This is a sample post about Vue 3...',
+                        excerpt: 'Learn the basics of Vue 3 and how to get started with this progressive JavaScript framework.',
+                        featuredImage: 'https://via.placeholder.com/800x400',
+                        views: 1245,
+                        likes: 87,
+                        dislikes: 3,
+                        comments: [
+                            {
+                                author: 'Alice Johnson',
+                                avatar: 'https://via.placeholder.com/40',
+                                date: 'June 16, 2023',
+                                content: 'Great article! I\'ve been using Vue 2 for a while and was wondering about the benefits of upgrading to Vue 3. This helped a lot.'
+                            },
+                            {
+                                author: 'Bob Smith',
+                                avatar: 'https://via.placeholder.com/40',
+                                date: 'June 17, 2023',
+                                content: 'The Composition API looks interesting. Is it recommended to use it for all new Vue 3 projects, or is the Options API still preferred in some cases?'
+                            }
+                        ]
+                    },
+                    {
+                        id: 2,
+                        title: 'Tailwind CSS Tips and Tricks',
+                        author: 'Jane Smith',
+                        category: 'Design',
+                        tags: ['CSS', 'Tailwind', 'Design'],
+                        date: 'June 14, 2023',
+                        status: 'published',
+                        content: 'Here are some Tailwind CSS tips...',
+                     excerpt: 'Discover powerful Tailwind CSS techniques to improve your workflow and design process.',
+                        featuredImage: 'https://via.placeholder.com/800x400',
+                        views: 982,
+                        likes: 64,
+                        dislikes: 5,
+                        comments: [
+                            {
+                                author: 'Charlie Brown',
+                                avatar: '',
+                                date: 'June 15, 2023',
+                                content: 'I\'ve been using Tailwind for a few months now and these tips are really helpful!'
+                            }
+                        ]
+                    },
+                    {
+                        id: 3,
+                        title: 'PHP 8 New Features',
+                        author: 'Mike Johnson',
+                        category: 'Development',
+                        tags: ['PHP', 'Backend'],
+                        date: 'June 12, 2023',
+                        status: 'published',
+                        content: 'PHP 8 introduces several new features...',
+                        excerpt: 'Explore the exciting new features in PHP 8 and how they can improve your development experience.',
+                        featuredImage: 'https://via.placeholder.com/800x400',
+                        views: 543,
+                        likes: 32,
+                        dislikes: 2,
+                        comments: []
+                    },
+                    {
+                        id: 4,
+                        title: 'Responsive Design Best Practices',
+                        author: 'Sarah Williams',
+                        category: 'Design',
+                        tags: ['CSS', 'Responsive', 'Design'],
+                        date: 'June 10, 2023',
+                        status: 'published',
+                        content: 'Follow these best practices for responsive design...',
+                        excerpt: 'Learn how to create truly responsive websites that work well on all devices.',
+                        featuredImage: 'https://via.placeholder.com/800x400',
+                        views: 876,
+                        likes: 45,
+                        dislikes: 1,
+                        comments: [
+                            {
+                                author: 'David Lee',
+                                avatar: 'https://via.placeholder.com/40',
+                                date: 'June 11, 2023',
+                                content: 'Great tips! I especially like the section about media queries.'
+                            }
+                        ]
+                    },
+                    {
+                        id: 5,
+                        title: 'JavaScript Async/Await Tutorial',
+                        author: 'John Doe',
+                        category: 'Development',
+                        tags: ['JavaScript', 'Async', 'Tutorial'],
+                        date: 'June 8, 2023',
+                        status: 'published',
+                        content: 'Master async/await in JavaScript...',
+                        excerpt: 'A comprehensive guide to using async/await for better asynchronous JavaScript code.',
+                        featuredImage: 'https://via.placeholder.com/800x400',
+                        views: 1532,
+                        likes: 112,
+                        dislikes: 8,
+                        comments: [
+                            {
+                                author: 'Emily Chen',
+                                avatar: 'https://via.placeholder.com/40',
+                                date: 'June 9, 2023',
+                                content: 'This tutorial really helped me understand async/await. Thanks!'
+                            },
+                            {
+                                author: 'Frank Wilson',
+                                avatar: '',
+                                date: 'June 10, 2023',
+                                content: 'I\'ve been struggling with Promises for a while. This makes it so much clearer!'
+                            }
+                        ]
+                    },
+                    {
+                        id: 6,
+                        title: 'Introduction to Docker for Web Developers',
+                        author: 'Alex Johnson',
+                        category: 'DevOps',
+                        tags: ['Docker', 'DevOps', 'Containers'],
+                        date: 'June 5, 2023',
+                        status: 'published',
+                        content: 'Learn how to use Docker for web development...',
+                        excerpt: 'A beginner-friendly guide to Docker containers and how they can improve your development workflow.',
+                        featuredImage: 'https://via.placeholder.com/800x400',
+                        views: 723,
+                        likes: 56,
+                        dislikes: 3,
+                        comments: []
+                    }
+                ]);
 
-          const recentPosts = ref([
-            {
-              id: 1,
-              title: "Getting Started with Vue 3",
-              author: "John Doe",
-              category: "Development",
-              date: "2023-06-15",
-              status: "published",
-            },
-            {
-              id: 2,
-              title: "Tailwind CSS Tips and Tricks",
-              author: "Jane Smith",
-              category: "Design",
-              date: "2023-06-14",
-              status: "published",
-            },
-            {
-              id: 3,
-              title: "PHP 8 New Features",
-              author: "Mike Johnson",
-              category: "Development",
-              date: "2023-06-12",
-              status: "draft",
-            },
-            {
-              id: 4,
-              title: "Responsive Design Best Practices",
-              author: "Sarah Williams",
-              category: "Design",
-              date: "2023-06-10",
-              status: "pending",
-            },
-          ]);
+                const categories = ref(['Development', 'Design', 'DevOps', 'Marketing', 'Business', 'Technology']);
 
-          const recentComments = ref([
-            {
-              id: 1,
-              author: "Alex Thompson",
-              post: "Getting Started with Vue 3",
-              content: "This was really helpful, thanks for sharing!",
-              date: "2023-06-15",
-            },
-            {
-              id: 2,
-              author: "Emily Davis",
-              post: "Tailwind CSS Tips and Tricks",
-              content:
-                "I've been using Tailwind for a while now and these tips are gold!",
-              date: "2023-06-14",
-            },
-            {
-              id: 3,
-              author: "Robert Wilson",
-              post: "PHP 8 New Features",
-              content:
-                "Can't wait to try out the new match expression in PHP 8.",
-              date: "2023-06-12",
-            },
-          ]);
+                // UI State
+                const searchQuery = ref('');
+                const categoryFilter = ref('');
+                const sortBy = ref('date');
+                const currentPage = ref(1);
+                const perPage = ref(6);
+                const newsletterEmail = ref('');
 
-          const getStatusClass = (status) => {
-            switch (status) {
-              case "published":
-                return "bg-green-100 text-green-800";
-              case "draft":
-                return "bg-gray-100 text-gray-800";
-              case "pending":
-                return "bg-yellow-100 text-yellow-800";
-              default:
-                return "bg-gray-100 text-gray-800";
+                // Computed
+                const featuredPost = computed(() => {
+                    return posts.value.find(post => post.id === 1); // Just using the first post as featured for demo
+                });
+
+                const filteredPosts = computed(() => {
+                    let result = [...posts.value];
+
+                    // Remove featured post from the list
+                    result = result.filter(post => post.id !== featuredPost.value.id);
+
+                    // Apply search filter
+                    if (searchQuery.value) {
+                        const query = searchQuery.value.toLowerCase();
+                        result = result.filter(post =>
+                            post.title.toLowerCase().includes(query) ||
+                            post.content.toLowerCase().includes(query) ||
+                            post.excerpt.toLowerCase().includes(query) ||
+                            post.author.toLowerCase().includes(query)
+                        );
+                    }
+
+                    // Apply category filter
+                    if (categoryFilter.value) {
+                        result = result.filter(post => post.category === categoryFilter.value);
+                    }
+
+                    // Apply sorting
+                    if (sortBy.value === 'date') {
+                        // Assuming newer posts have higher IDs for this demo
+                        result.sort((a, b) => b.id - a.id);
+                    } else if (sortBy.value === 'views') {
+                        result.sort((a, b) => b.views - a.views);
+                    } else if (sortBy.value === 'likes') {
+                        result.sort((a, b) => b.likes - a.likes);
+                    }
+
+                    return result;
+                });
+
+                const paginatedPosts = computed(() => {
+                    const startIndex = (currentPage.value - 1) * perPage.value;
+                    const endIndex = startIndex + perPage.value;
+                    return filteredPosts.value.slice(startIndex, endIndex);
+                });
+
+                const totalPages = computed(() => {
+                    return Math.ceil(filteredPosts.value.length / perPage.value);
+                });
+
+                const displayedPages = computed(() => {
+                    const pages = [];
+                    const maxPagesToShow = 5;
+
+                    if (totalPages.value <= maxPagesToShow) {
+                        // Show all pages
+                        for (let i = 1; i <= totalPages.value; i++) {
+                            pages.push(i);
+                        }
+                    } else {
+                        // Always show first page
+                        pages.push(1);
+
+                        let startPage = Math.max(2, currentPage.value - 1);
+                        let endPage = Math.min(totalPages.value - 1, currentPage.value + 1);
+
+                        // Adjust if at the beginning or end
+                        if (currentPage.value <= 2) {
+                            endPage = 4;
+                        } else if (currentPage.value >= totalPages.value - 1) {
+                            startPage = totalPages.value - 3;
+                        }
+
+                        // Add ellipsis if needed
+                        if (startPage > 2) {
+                            pages.push('...');
+                        }
+
+                        // Add middle pages
+                        for (let i = startPage; i <= endPage; i++) {
+                            pages.push(i);
+                        }
+
+                        // Add ellipsis if needed
+                        if (endPage < totalPages.value - 1) {
+                            pages.push('...');
+                        }
+
+                        // Always show last page
+                        pages.push(totalPages.value);
+                    }
+
+                    return pages;
+                });
+
+                // Methods
+                const prevPage = () => {
+                    if (currentPage.value > 1) {
+                        currentPage.value--;
+                    }
+                };
+
+                const nextPage = () => {
+                    if (currentPage.value < totalPages.value) {
+                        currentPage.value++;
+                    }
+                };
+
+                const goToPage = (page) => {
+                    if (typeof page === 'number') {
+                        currentPage.value = page;
+                    }
+                };
+
+                const subscribeNewsletter = () => {
+                    if (!newsletterEmail.value) {
+                        alert('Please enter your email address');
+                        return;
+                    }
+
+                    // In a real app, this would send the email to the server
+                    alert(`Thank you for subscribing with: ${newsletterEmail.value}`);
+                    newsletterEmail.value = '';
+                };
+
+                return {
+                    posts: paginatedPosts,
+                    categories,
+                    searchQuery,
+                    categoryFilter,
+                    sortBy,
+                    currentPage,
+                    featuredPost,
+                    totalPages,
+                    displayedPages,
+                    newsletterEmail,
+                    prevPage,
+                    nextPage,
+                    goToPage,
+                    subscribeNewsletter
+                };
             }
-          };
-
-          const logout = () => {
-            alert("Logout functionality will be implemented with your backend");
-          };
-
-          return {
-            stats,
-            recentPosts,
-            recentComments,
-            getStatusClass,
-            logout,
-          };
-        },
-      }).mount("#app");
+        }).mount('#app');
     </script>
-  </body>
+</body>
 </html>
