@@ -1,0 +1,2183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newsletter - Blog Admin</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vue 3 CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="min-h-screen flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-gray-800 text-white">
+            <div class="p-4 border-b border-gray-700">
+                <h2 class="text-2xl font-bold">Blog Admin</h2>
+            </div>
+            <nav class="p-2">
+                <ul>
+                    <li class="mb-1">
+                        <a href="index.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="posts.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-file-alt mr-2"></i> Posts
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="categories.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-folder mr-2"></i> Categories
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="tags.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-tags mr-2"></i> Tags
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="comments.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-comments mr-2"></i> Comments
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="media.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-images mr-2"></i> Media
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="users.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-users mr-2"></i> Users
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="newsletter.html" class="block px-4 py-2 rounded hover:bg-gray-700 bg-gray-700">
+                            <i class="fas fa-envelope mr-2"></i> Newsletter
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="settings.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-cog mr-2"></i> Settings
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1">
+            <!-- Header -->
+            <header class="bg-white shadow p-4 flex justify-between items-center">
+                <h1 class="text-xl font-semibold">Newsletter</h1>
+                <div class="flex items-center">
+                    <span class="mr-4">Welcome, Admin</span>
+                    <button @click="logout" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                    </button>
+                </div>
+            </header>
+
+            <!-- Newsletter Content -->
+            <div class="p-6">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-blue-100 text-blue-500 mr-4">
+                                <i class="fas fa-users text-xl"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-500">Total Subscribers</div>
+                                <div class="text-2xl font-semibold">{{ stats.totalSubscribers }}</div>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-sm text-green-500">
+                            <i class="fas fa-arrow-up mr-1"></i> {{ stats.subscriberGrowth }}% from last month
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-green-100 text-green-500 mr-4">
+                                <i class="fas fa-envelope-open text-xl"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-500">Open Rate</div>
+                                <div class="text-2xl font-semibold">{{ stats.openRate }}%</div>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-sm" :class="stats.openRateChange >= 0 ? 'text-green-500' : 'text-red-500'">
+                            <i :class="stats.openRateChange >= 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down'" class="mr-1"></i>
+                            {{ Math.abs(stats.openRateChange) }}% from last campaign
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-purple-100 text-purple-500 mr-4">
+                                <i class="fas fa-mouse-pointer text-xl"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-500">Click Rate</div>
+                                <div class="text-2xl font-semibold">{{ stats.clickRate }}%</div>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-sm" :class="stats.clickRateChange >= 0 ? 'text-green-500' : 'text-red-500'">
+                            <i :class="stats.clickRateChange >= 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down'" class="mr-1"></i>
+                            {{ Math.abs(stats.clickRateChange) }}% from last campaign
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-red-100 text-red-500 mr-4">
+                                <i class="fas fa-user-minus text-xl"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-500">Unsubscribe Rate</div>
+                                <div class="text-2xl font-semibold">{{ stats.unsubscribeRate }}%</div>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-sm" :class="stats.unsubscribeRateChange <= 0 ? 'text-green-500' : 'text-red-500'">
+                            <i :class="stats.unsubscribeRateChange <= 0 ? 'fas fa-arrow-down' : 'fas fa-arrow-up'" class="mr-1"></i>
+                            {{ Math.abs(stats.unsubscribeRateChange) }}% from last campaign
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="bg-white rounded-lg shadow mb-6">
+                    <div class="border-b">
+                        <nav class="flex">
+                            <button @click="activeTab = 'subscribers'" :class="[
+                                'px-4 py-3 text-sm font-medium border-b-2 focus:outline-none',
+                                activeTab === 'subscribers'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            ]">
+                                Subscribers
+                            </button>
+                            <button @click="activeTab = 'campaigns'" :class="[
+                                'px-4 py-3 text-sm font-medium border-b-2 focus:outline-none',
+                                activeTab === 'campaigns'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            ]">
+                                Campaigns
+                            </button>
+                            <button @click="activeTab = 'templates'" :class="[
+                                'px-4 py-3 text-sm font-medium border-b-2 focus:outline-none',
+                                activeTab === 'templates'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            ]">
+                                Templates
+                            </button>
+                            <button @click="activeTab = 'analytics'" :class="[
+                                'px-4 py-3 text-sm font-medium border-b-2 focus:outline-none',
+                                activeTab === 'analytics'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            ]">
+                                Analytics
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Subscribers Tab Content -->
+                <div v-if="activeTab === 'subscribers'">
+                    <!-- Filters and Actions -->
+                    <div class="bg-white rounded-lg shadow p-6 mb-6">
+                        <div class="flex flex-wrap items-center justify-between gap-4">
+                            <div>
+                                <button @click="showAddSubscriberModal = true" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                    <i class="fas fa-user-plus mr-1"></i> Add Subscriber
+                                </button>
+                                <button @click="showImportModal = true" class="ml-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                                    <i class="fas fa-file-import mr-1"></i> Import
+                                </button>
+                                <button @click="exportSubscribers" class="ml-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                                    <i class="fas fa-file-export mr-1"></i> Export
+                                </button>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-4">
+                                <div>
+                                    <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                    <select id="statusFilter" v-model="filters.status" @change="applyFilters"
+                                        class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="all">All Status</option>
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                        <option value="unconfirmed">Unconfirmed</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="sourceFilter" class="block text-sm font-medium text-gray-700 mb-1">Source</label>
+                                    <select id="sourceFilter" v-model="filters.source" @change="applyFilters"
+                                        class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="all">All Sources</option>
+                                        <option value="website">Website</option>
+                                        <option value="import">Import</option>
+                                        <option value="manual">Manual</option>
+                                        <option value="api">API</option>
+                                    </select>
+                                </div>
+                                <div class="relative">
+                                    <label for="searchSubscribers" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                                    <input type="text" id="searchSubscribers" v-model="searchQuery" @input="applyFilters" placeholder="Search subscribers..."
+                                        class="border rounded px-3 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64">
+                                    <i class="fas fa-search absolute left-3 top-9 text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subscribers Table -->
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="flex justify-between items-center p-4 border-b">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="selectAll" v-model="selectAll" @change="toggleSelectAll"
+                                    class="mr-2 rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                <label for="selectAll" class="text-sm text-gray-700">Select All</label>
+
+                                <div v-if="hasSelectedSubscribers" class="ml-4 flex items-center">
+                                  <select v-model="bulkAction" class="border rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                                        <option value="">Bulk Actions</option>
+                                        <option value="activate">Activate</option>
+                                        <option value="deactivate">Deactivate</option>
+                                        <option value="delete">Delete</option>
+                                        <option value="export">Export</option>
+                                    </select>
+                                    <button @click="applyBulkAction" class="ml-2 px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 text-sm">
+                                        Apply
+                                    </button>
+                                    <span class="ml-2 text-sm text-gray-600">{{ selectedCount }} selected</span>
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-600">
+                                Showing {{ paginationStart }} to {{ paginationEnd }} of {{ totalSubscribers }} subscribers
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
+                                            <span class="sr-only">Select</span>
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Email
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Name
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Status
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Source
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Subscribed Date
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Open Rate
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr v-for="subscriber in paginatedSubscribers" :key="subscriber.id" class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <input type="checkbox" v-model="subscriber.selected" class="rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-medium text-gray-900">{{ subscriber.email }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">{{ subscriber.name || '-' }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span :class="{
+                                                'px-2 py-1 text-xs font-semibold rounded-full': true,
+                                                'bg-green-100 text-green-800': subscriber.status === 'active',
+                                                'bg-red-100 text-red-800': subscriber.status === 'inactive',
+                                                'bg-yellow-100 text-yellow-800': subscriber.status === 'unconfirmed'
+                                            }">
+                                                {{ subscriber.status }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">{{ subscriber.source }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">{{ formatDate(subscriber.subscribedAt) }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">{{ subscriber.openRate }}%</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <button @click="editSubscriber(subscriber)" class="text-blue-600 hover:text-blue-900 mr-2">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button @click="viewSubscriberActivity(subscriber)" class="text-blue-600 hover:text-blue-900 mr-2">
+                                                <i class="fas fa-chart-line"></i>
+                                            </button>
+                                            <button @click="confirmDeleteSubscriber(subscriber.id)" class="text-red-600 hover:text-red-900">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr v-if="paginatedSubscribers.length === 0">
+                                        <td colspan="8" class="px-6 py-4 text-center text-gray-500">
+                                            No subscribers found matching your criteria.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="px-6 py-4 flex items-center justify-between border-t">
+                            <div>
+                                <select v-model="itemsPerPage" @change="updatePagination"
+                                    class="border rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                                    <option :value="10">10 per page</option>
+                                    <option :value="25">25 per page</option>
+                                    <option :value="50">50 per page</option>
+                                    <option :value="100">100 per page</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button @click="prevPage" :disabled="currentPage === 1"
+                                    class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 disabled:opacity-50 text-sm">
+                                    <i class="fas fa-chevron-left mr-1"></i> Previous
+                                </button>
+                                <div class="text-sm text-gray-600">
+                                    Page {{ currentPage }} of {{ totalPages }}
+                                </div>
+                                <button @click="nextPage" :disabled="currentPage === totalPages"
+                                    class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 disabled:opacity-50 text-sm">
+                                    Next <i class="fas fa-chevron-right ml-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Campaigns Tab Content -->
+                <div v-if="activeTab === 'campaigns'">
+                    <!-- Campaign Actions -->
+                    <div class="bg-white rounded-lg shadow p-6 mb-6">
+                        <div class="flex justify-between items-center">
+                            <button @click="showCreateCampaignModal = true" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                <i class="fas fa-plus mr-1"></i> Create Campaign
+                            </button>
+                            <div class="relative">
+                                <input type="text" v-model="campaignSearchQuery" @input="filterCampaigns" placeholder="Search campaigns..."
+                                    class="border rounded px-3 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64">
+                                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Campaigns List -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div v-for="campaign in filteredCampaigns" :key="campaign.id" class="bg-white rounded-lg shadow overflow-hidden">
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-4">
+                                    <h3 class="text-lg font-semibold">{{ campaign.name }}</h3>
+                                    <span :class="{
+                                        'px-2 py-1 text-xs font-semibold rounded-full': true,
+                                        'bg-green-100 text-green-800': campaign.status === 'sent',
+                                        'bg-blue-100 text-blue-800': campaign.status === 'draft',
+                                        'bg-yellow-100 text-yellow-800': campaign.status === 'scheduled',
+                                        'bg-purple-100 text-purple-800': campaign.status === 'sending'
+                                    }">
+                                        {{ campaign.status }}
+                                    </span>
+                                </div>
+                                <p class="text-gray-600 text-sm mb-4">{{ campaign.subject }}</p>
+                                <div class="flex flex-wrap gap-y-2 text-sm text-gray-500 mb-4">
+                                    <div class="w-full md:w-1/2 flex items-center">
+                                        <i class="far fa-calendar mr-2"></i>
+                                        <span>{{ formatDate(campaign.createdAt) }}</span>
+                                    </div>
+                                    <div class="w-full md:w-1/2 flex items-center">
+                                        <i class="far fa-user mr-2"></i>
+                                        <span>{{ campaign.recipients }} recipients</span>
+                                    </div>
+                                    <div v-if="campaign.status === 'scheduled'" class="w-full md:w-1/2 flex items-center">
+                                        <i class="far fa-clock mr-2"></i>
+                                        <span>Scheduled: {{ formatDate(campaign.scheduledFor) }}</span>
+                                    </div>
+                                    <div v-if="campaign.status === 'sent'" class="w-full md:w-1/2 flex items-center">
+                                        <i class="far fa-paper-plane mr-2"></i>
+                                        <span>Sent: {{ formatDate(campaign.sentAt) }}</span>
+                                    </div>
+                                </div>
+
+                                <div v-if="campaign.status === 'sent'" class="grid grid-cols-3 gap-2 mb-4 text-center">
+                                    <div class="bg-gray-50 p-2 rounded">
+                                        <div class="text-sm font-semibold">{{ campaign.openRate }}%</div>
+                                        <div class="text-xs text-gray-500">Opens</div>
+                                    </div>
+                                    <div class="bg-gray-50 p-2 rounded">
+                                        <div class="text-sm font-semibold">{{ campaign.clickRate }}%</div>
+                                        <div class="text-xs text-gray-500">Clicks</div>
+                                    </div>
+                                    <div class="bg-gray-50 p-2 rounded">
+                                        <div class="text-sm font-semibold">{{ campaign.unsubscribeRate }}%</div>
+                                        <div class="text-xs text-gray-500">Unsubs</div>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-between">
+                                    <div>
+                                        <button v-if="campaign.status === 'draft'" @click="editCampaign(campaign)"
+                                            class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm">
+                                            <i class="fas fa-edit mr-1"></i> Edit
+                                        </button>
+                                        <button v-if="campaign.status === 'draft'" @click="confirmSendCampaign(campaign)"
+                                            class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm ml-2">
+                                            <i class="fas fa-paper-plane mr-1"></i> Send
+                                        </button>
+                                        <button v-if="campaign.status === 'scheduled'" @click="cancelScheduledCampaign(campaign)"
+                                            class="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-sm">
+                                            <i class="fas fa-ban mr-1"></i> Cancel
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <button v-if="campaign.status === 'sent'" @click="viewCampaignReport(campaign)"
+                                            class="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 text-sm">
+                                            <i class="fas fa-chart-bar mr-1"></i> Report
+                                        </button>
+                                        <button @click="duplicateCampaign(campaign)"
+                                            class="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 text-sm ml-2">
+                                            <i class="fas fa-copy mr-1"></i> Duplicate
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div v-if="filteredCampaigns.length === 0" class="md:col-span-3 bg-white rounded-lg shadow p-8 text-center text-gray-500">
+                            <i class="fas fa-envelope-open text-4xl mb-4"></i>
+                             <p class="mb-4">No campaigns found matching your criteria.</p>
+                            <button @click="showCreateCampaignModal = true" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                <i class="fas fa-plus mr-1"></i> Create Your First Campaign
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Templates Tab Content -->
+                <div v-if="activeTab === 'templates'">
+                    <!-- Template Actions -->
+                    <div class="bg-white rounded-lg shadow p-6 mb-6">
+                        <div class="flex justify-between items-center">
+                            <button @click="showCreateTemplateModal = true" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                <i class="fas fa-plus mr-1"></i> Create Template
+                            </button>
+                            <div class="relative">
+                                <input type="text" v-model="templateSearchQuery" @input="filterTemplates" placeholder="Search templates..."
+                                    class="border rounded px-3 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64">
+                                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Templates Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div v-for="template in filteredTemplates" :key="template.id" class="bg-white rounded-lg shadow overflow-hidden">
+                            <div class="h-40 bg-gray-100 relative">
+                                <img :src="template.thumbnail" alt="Template Preview" class="w-full h-full object-cover">
+                                <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-50 transition-all flex items-center justify-center opacity-0 hover:opacity-100">
+                                    <button @click="previewTemplate(template)" class="px-3 py-1 bg-white text-gray-800 rounded text-sm mx-1">
+                                        <i class="fas fa-eye mr-1"></i> Preview
+                                    </button>
+                                    <button @click="editTemplate(template)" class="px-3 py-1 bg-blue-500 text-white rounded text-sm mx-1">
+                                        <i class="fas fa-edit mr-1"></i> Edit
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="text-lg font-semibold">{{ template.name }}</h3>
+                                    <span class="text-xs text-gray-500">{{ formatDate(template.updatedAt) }}</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-4">{{ template.description }}</p>
+                                <div class="flex justify-between">
+                                    <button @click="useTemplateForCampaign(template)" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm">
+                                        <i class="fas fa-paper-plane mr-1"></i> Use
+                                    </button>
+                                    <button @click="confirmDeleteTemplate(template.id)" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm">
+                                        <i class="fas fa-trash-alt mr-1"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div v-if="filteredTemplates.length === 0" class="md:col-span-3 bg-white rounded-lg shadow p-8 text-center text-gray-500">
+                            <i class="fas fa-file-alt text-4xl mb-4"></i>
+                            <p class="mb-4">No templates found matching your criteria.</p>
+                            <button @click="showCreateTemplateModal = true" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                <i class="fas fa-plus mr-1"></i> Create Your First Template
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Tab Content -->
+                <div v-if="activeTab === 'analytics'">
+                    <!-- Date Range Filter -->
+                    <div class="bg-white rounded-lg shadow p-6 mb-6">
+                        <div class="flex flex-wrap items-center justify-between gap-4">
+                            <h3 class="text-lg font-semibold">Newsletter Performance</h3>
+                            <div class="flex items-center space-x-4">
+                                <div>
+                                    <label for="dateRange" class="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+                                    <select id="dateRange" v-model="analyticsDateRange" @change="updateAnalytics"
+                                        class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="7days">Last 7 Days</option>
+                                        <option value="30days">Last 30 Days</option>
+                                        <option value="90days">Last 90 Days</option>
+                                        <option value="year">Last Year</option>
+                                        <option value="custom">Custom Range</option>
+                                    </select>
+                                </div>
+                                <div v-if="analyticsDateRange === 'custom'" class="flex items-center space-x-2">
+                                    <div>
+                                        <label for="startDate" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                                        <input type="date" id="startDate" v-model="customDateRange.start" @change="updateAnalytics"
+                                            class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label for="endDate" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                                        <input type="date" id="endDate" v-model="customDateRange.end" @change="updateAnalytics"
+                                            class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analytics Charts -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold mb-4">Subscriber Growth</h3>
+                            <canvas id="subscriberGrowthChart" height="300"></canvas>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold mb-4">Engagement Metrics</h3>
+                            <canvas id="engagementChart" height="300"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold mb-4">Top Performing Campaigns</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Campaign
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Sent Date
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Open Rate
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Click Rate
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <tr v-for="campaign in topCampaigns" :key="campaign.id" class="hover:bg-gray-50">
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm font-medium text-gray-900">{{ campaign.name }}</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900">{{ formatDate(campaign.sentAt) }}</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900">{{ campaign.openRate }}%</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900">{{ campaign.clickRate }}%</div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold mb-4">Link Performance</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Link
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Campaign
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Clicks
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                CTR
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <tr v-for="link in topLinks" :key="link.id" class="hover:bg-gray-50">
+                                            <td class="px-6 py-4">
+                                                <div class="text-sm font-medium text-blue-600 hover:underline truncate max-w-xs">
+                                                    <a :href="link.url" target="_blank">{{ link.title || link.url }}</a>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900">{{ link.campaign }}</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900">{{ link.clicks }}</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900">{{ link.ctr }}%</div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold mb-4">Subscriber Activity</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <h4 class="text-md font-medium mb-2">Most Engaged Subscribers</h4>
+                                <div class="space-y-2">
+                                    <div v-for="subscriber in mostEngagedSubscribers" :key="subscriber.id"
+                                        class="flex items-center justify-between p-2 border rounded hover:bg-gray-50">
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center mr-2">
+                                                {{ subscriber.name ? subscriber.name.charAt(0) : subscriber.email.charAt(0) }}
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-medium">{{ subscriber.name || 'Unnamed' }}</div>
+                                                <div class="text-xs text-gray-500">{{ subscriber.email }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="text-sm font-medium">{{ subscriber.openRate }}%</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-md font-medium mb-2">Recent Unsubscribes</h4>
+                                <div class="space-y-2">
+                                    <div v-for="subscriber in recentUnsubscribes" :key="subscriber.id"
+                                        class="flex items-center justify-between p-2 border rounded hover:bg-gray-50">
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 bg-red-100 text-red-500 rounded-full flex items-center justify-center mr-2">
+                                                {{ subscriber.name ? subscriber.name.charAt(0) : subscriber.email.charAt(0) }}
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-medium">{{ subscriber.name || 'Unnamed' }}</div>
+                                                <div class="text-xs text-gray-500">{{ subscriber.email }}</div>
+                                            </div>
+                                        </div>
+                                   <div class="text-xs text-gray-500">{{ formatDate(subscriber.unsubscribedAt) }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-md font-medium mb-2">Subscriber Devices</h4>
+                                <canvas id="deviceChart" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Add Subscriber Modal -->
+        <div v-if="showAddSubscriberModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-md">
+                <div class="p-6 border-b">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-semibold">Add New Subscriber</h3>
+                        <button @click="showAddSubscriberModal = false" class="text-gray-400 hover:text-gray-500">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4">
+                        <label for="subscriberEmail" class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
+                        <input type="email" id="subscriberEmail" v-model="subscriberForm.email" required
+                            class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="mb-4">
+                        <label for="subscriberName" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                        <input type="text" id="subscriberName" v-model="subscriberForm.name"
+                            class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="mb-4">
+                        <label for="subscriberStatus" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select id="subscriberStatus" v-model="subscriberForm.status"
+                            class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="unconfirmed">Unconfirmed</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Custom Fields</label>
+                        <div v-for="(field, index) in subscriberForm.customFields" :key="index" class="flex items-center mb-2">
+                            <input type="text" v-model="field.name" placeholder="Field name"
+                                class="w-1/3 border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 mr-2">
+                            <input type="text" v-model="field.value" placeholder="Value"
+                                class="w-2/3 border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button @click="removeCustomField(index)" class="ml-2 text-red-500 hover:text-red-700">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <button @click="addCustomField" class="text-sm text-blue-500 hover:text-blue-700">
+                            <i class="fas fa-plus mr-1"></i> Add Custom Field
+                        </button>
+                    </div>
+                    <div class="mb-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" v-model="subscriberForm.sendConfirmation"
+                                class="rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 mr-2">
+                            <span class="text-sm text-gray-700">Send confirmation email</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="p-6 border-t bg-gray-50 flex justify-end">
+                    <button @click="showAddSubscriberModal = false" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 mr-2">
+                        Cancel
+                    </button>
+                    <button @click="saveSubscriber" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        Add Subscriber
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Import Subscribers Modal -->
+        <div v-if="showImportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-lg">
+                <div class="p-6 border-b">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-semibold">Import Subscribers</h3>
+                        <button @click="showImportModal = false" class="text-gray-400 hover:text-gray-500">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4">
+                        <label for="importFile" class="block text-sm font-medium text-gray-700 mb-1">CSV or Excel File</label>
+                        <input type="file" id="importFile" @change="handleFileUpload" accept=".csv,.xlsx,.xls"
+                            class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p class="text-xs text-gray-500 mt-1">
+                            File should contain at minimum an email column. Other recognized columns: name, status, subscribed_at
+                        </p>
+                    </div>
+
+                    <div v-if="importPreview.headers.length > 0" class="mb-4">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">Column Mapping</h4>
+                        <div class="overflow-x-auto max-h-60">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            File Column
+                                        </th>
+                                        <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Map To
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr v-for="(header, index) in importPreview.headers" :key="index">
+                                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                            {{ header }}
+                                        </td>
+                                        <td class="px-3 py-2 whitespace-nowrap">
+                                            <select v-model="importMapping[header]"
+                                                class="border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                <option value="">-- Ignore --</option>
+                                                <option value="email">Email</option>
+                                                <option value="name">Name</option>
+                                                <option value="status">Status</option>
+                                                <option value="subscribed_at">Subscribed Date</option>
+                                                <option value="custom">Custom Field</option>
+                                            </select>
+                                            <input v-if="importMapping[header] === 'custom'" type="text"
+                                                v-model="customFieldNames[header]" placeholder="Custom field name"
+                                                class="mt-1 border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div v-if="importPreview.rows.length > 0" class="mb-4">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">Preview ({{ importPreview.rows.length }} records)</h4>
+                        <div class="overflow-x-auto max-h-60">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th v-for="header in importPreview.headers" :key="header"
+                                            class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            {{ header }}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr v-for="(row, rowIndex) in importPreview.rows.slice(0, 5)" :key="rowIndex">
+                                        <td v-for="header in importPreview.headers" :key="`${rowIndex}-${header}`"
+                                            class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                            {{ row[header] }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p v-if="importPreview.rows.length > 5" class="text-xs text-gray-500 mt-1">
+                            Showing first 5 of {{ importPreview.rows.length }} records
+                        </p>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" v-model="importOptions.skipDuplicates"
+                                class="rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 mr-2">
+                            <span class="text-sm text-gray-700">Skip duplicate email addresses</span>
+                        </label>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" v-model="importOptions.sendConfirmation"
+                                class="rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 mr-2">
+                            <span class="text-sm text-gray-700">Send confirmation email to new subscribers</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="p-6 border-t bg-gray-50 flex justify-end">
+                    <button @click="showImportModal = false" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 mr-2">
+                        Cancel
+                    </button>
+                    <button @click="importSubscribers" :disabled="importPreview.headers.length === 0"
+                        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50">
+                        Import Subscribers
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Campaign Modal -->
+        <div v-if="showCreateCampaignModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-screen overflow-y-auto">
+                <div class="p-6 border-b">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-semibold">Create New Campaign</h3>
+                        <button @click="showCreateCampaignModal = false" class="text-gray-400 hover:text-gray-500">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <!-- Campaign Form -->
+                    <div class="mb-6">
+                        <h4 class="text-md font-medium mb-4">Campaign Details</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label for="campaignName" class="block text-sm font-medium text-gray-700 mb-1">Campaign Name *</label>
+                                <input type="text" id="campaignName" v-model="campaignForm.name" required
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="campaignSubject" class="block text-sm font-medium text-gray-700 mb-1">Email Subject *</label>
+                                <input type="text" id="campaignSubject" v-model="campaignForm.subject" required
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="campaignFromName" class="block text-sm font-medium text-gray-700 mb-1">From Name</label>
+                            <input type="text" id="campaignFromName" v-model="campaignForm.fromName"
+                                class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="campaignFromEmail" class="block text-sm font-medium text-gray-700 mb-1">From Email</label>
+                            <input type="email" id="campaignFromEmail" v-model="campaignForm.fromEmail"
+                                class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+
+                      <div class="mb-4">
+                            <label for="campaignReplyTo" class="block text-sm font-medium text-gray-700 mb-1">Reply-To Email</label>
+                            <input type="email" id="campaignReplyTo" v-model="campaignForm.replyTo"
+                                class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <h4 class="text-md font-medium mb-4">Content</h4>
+                        <div class="mb-4">
+                            <label for="campaignTemplate" class="block text-sm font-medium text-gray-700 mb-1">Template</label>
+                            <select id="campaignTemplate" v-model="campaignForm.templateId" @change="loadTemplate"
+                                class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">-- Select Template --</option>
+                                <option v-for="template in templates" :key="template.id" :value="template.id">
+                                    {{ template.name }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="campaignContent" class="block text-sm font-medium text-gray-700 mb-1">Email Content</label>
+                            <textarea id="campaignContent" v-model="campaignForm.content" rows="10"
+                                class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            <p class="text-xs text-gray-500 mt-1">
+                                HTML is supported. Use {name} to personalize with subscriber's name.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <h4 class="text-md font-medium mb-4">Recipients</h4>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Send To</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="radio" v-model="campaignForm.recipientType" value="all"
+                                        class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 mr-2">
+                                    <span class="text-sm text-gray-700">All active subscribers ({{ stats.totalSubscribers }})</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" v-model="campaignForm.recipientType" value="segment"
+                                        class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 mr-2">
+                                    <span class="text-sm text-gray-700">Specific segment</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div v-if="campaignForm.recipientType === 'segment'" class="mb-4">
+                            <label for="campaignSegment" class="block text-sm font-medium text-gray-700 mb-1">Select Segment</label>
+                            <select id="campaignSegment" v-model="campaignForm.segmentId"
+                                class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">-- Select Segment --</option>
+                                <option value="recent">Recent subscribers (last 30 days)</option>
+                                <option value="engaged">Highly engaged (open rate > 50%)</option>
+                                <option value="inactive">Inactive (no opens in 90 days)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <h4 class="text-md font-medium mb-4">Delivery</h4>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">When to Send</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="radio" v-model="campaignForm.deliveryType" value="immediate"
+                                        class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 mr-2">
+                                    <span class="text-sm text-gray-700">Send immediately</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" v-model="campaignForm.deliveryType" value="scheduled"
+                                        class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 mr-2">
+                                    <span class="text-sm text-gray-700">Schedule for later</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div v-if="campaignForm.deliveryType === 'scheduled'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="scheduleDate" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                                <input type="date" id="scheduleDate" v-model="campaignForm.scheduleDate"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="scheduleTime" class="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                                <input type="time" id="scheduleTime" v-model="campaignForm.scheduleTime"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 border-t bg-gray-50 flex justify-between">
+                    <button @click="saveCampaignAsDraft" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
+                        Save as Draft
+                    </button>
+                    <div>
+                        <button @click="showCreateCampaignModal = false" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 mr-2">
+                            Cancel
+                        </button>
+                        <button @click="sendTestEmail" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 mr-2">
+                            Send Test
+                        </button>
+                        <button @click="saveCampaign" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                            {{ campaignForm.deliveryType === 'immediate' ? 'Send Campaign' : 'Schedule Campaign' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Template Modal -->
+        <div v-if="showCreateTemplateModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-screen overflow-y-auto">
+                <div class="p-6 border-b">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-semibold">Create Email Template</h3>
+                        <button @click="showCreateTemplateModal = false" class="text-gray-400 hover:text-gray-500">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4">
+                        <label for="templateName" class="block text-sm font-medium text-gray-700 mb-1">Template Name *</label>
+                        <input type="text" id="templateName" v-model="templateForm.name" required
+                            class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="templateDescription" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <input type="text" id="templateDescription" v-model="templateForm.description"
+                            class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="templateContent" class="block text-sm font-medium text-gray-700 mb-1">HTML Content *</label>
+                        <textarea id="templateContent" v-model="templateForm.content" rows="15" required
+                            class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"></textarea>
+                        <p class="text-xs text-gray-500 mt-1">
+                            Use {content} placeholder for the main content area. Use {name} to personalize with subscriber's name.
+                        </p>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="templatePreview" class="block text-sm font-medium text-gray-700 mb-1">Preview</label>
+                        <div id="templatePreview" class="border rounded p-4 bg-gray-50 h-64 overflow-auto">
+                            <div v-if="templateForm.content" v-html="templateForm.content.replace('{content}', 'Sample content will appear here').replace('{name}', 'John Doe')"></div>
+                            <div v-else class="text-gray-400 italic">Preview will appear here</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 border-t bg-gray-50 flex justify-end">
+                    <button @click="showCreateTemplateModal = false" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 mr-2">
+                        Cancel
+                    </button>
+                    <button @click="saveTemplate" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        Save Template
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirmation Modal -->
+        <div v-if="showConfirmationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-md">
+                <div class="p-6">
+                    <div class="flex items-center justify-center mb-4">
+                        <div class="bg-red-100 rounded-full p-3">
+                            <i class="fas fa-exclamation-triangle text-red-500 text-xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-semibold text-center mb-2">{{ confirmationTitle }}</h3>
+                    <p class="text-gray-600 text-center mb-6">{{ confirmationMessage }}</p>
+                    <div class="flex justify-center">
+                        <button @click="cancelConfirmation" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 mr-2">
+                            Cancel
+                        </button>
+                        <button @click="confirmAction" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                            {{ confirmButtonText }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted, watch } = Vue;
+
+        createApp({
+            setup() {
+                // State variables
+                const activeTab = ref('subscribers');
+                const subscribers = ref([]);
+                const campaigns = ref([]);
+                const templates = ref([]);
+                const stats = ref({
+                    totalSubscribers: 2547,
+                    subscriberGrowth: 12.5,
+                    openRate: 24.8,
+                    openRateChange: 2.3,
+                    clickRate: 3.6,
+                    clickRateChange: -0.5,
+                    unsubscribeRate: 0.2,
+                    unsubscribeRateChange: -0.1
+                });
+
+                // Filters
+                const filters = ref({
+                    status: 'all',
+                    source: 'all'
+                });
+                const searchQuery = ref('');
+
+                // Pagination
+                const currentPage = ref(1);
+                const itemsPerPage = ref(10);
+
+                // Modals
+                const showAddSubscriberModal = ref(false);
+                const showImportModal = ref(false);
+                const showCreateCampaignModal = ref(false);
+                const showCreateTemplateModal = ref(false);
+                const showConfirmationModal = ref(false);
+
+                // Forms
+                const subscriberForm = ref({
+                    email: '',
+                    name: '',
+                    status: 'active',
+                    customFields: [],
+                    sendConfirmation: false
+                });
+
+                const campaignForm = ref({
+                    name: '',
+                    subject: '',
+                    fromName: 'Blog Admin',
+                    fromEmail: 'newsletter@yourblog.com',
+                    replyTo: '',
+                    templateId: '',
+                    content: '',
+                    recipientType: 'all',
+                    segmentId: '',
+                    deliveryType: 'immediate',
+                    scheduleDate: '',
+                    scheduleTime: ''
+                });
+
+                const templateForm = ref({
+                    name: '',
+                    description: '',
+                    content: ''
+                });
+
+                // Import related
+                const importPreview = ref({
+                    headers: [],
+                    rows: []
+                });
+                const importMapping = ref({});
+                const customFieldNames = ref({});
+                const importOptions = ref({
+                    skipDuplicates: true,
+                    sendConfirmation: false
+                });
+
+                // Confirmation modal
+                const confirmationTitle = ref('');
+                const confirmationMessage = ref('');
+                const confirmButtonText = ref('Confirm');
+                const confirmCallback = ref(null);
+
+                // Analytics
+                const analyticsDateRange = ref('30days');
+                 const customDateRange = ref({
+                    start: '',
+                    end: ''
+                });
+
+                // Selection
+                const selectAll = ref(false);
+                const bulkAction = ref('');
+
+                // Campaign and template search
+                const campaignSearchQuery = ref('');
+                const templateSearchQuery = ref('');
+
+                // Analytics data
+                const topCampaigns = ref([]);
+                const topLinks = ref([]);
+                const mostEngagedSubscribers = ref([]);
+                const recentUnsubscribes = ref([]);
+
+                // Load mock data
+                onMounted(() => {
+                    loadSubscribers();
+                    loadCampaigns();
+                    loadTemplates();
+                    loadAnalyticsData();
+                    initCharts();
+                });
+
+                // Initialize charts
+                const initCharts = () => {
+                    // Subscriber growth chart
+                    const growthCtx = document.getElementById('subscriberGrowthChart').getContext('2d');
+                    new Chart(growthCtx, {
+                        type: 'line',
+                        data: {
+                            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                            datasets: [{
+                                label: 'New Subscribers',
+                                data: [120, 145, 180, 210, 160, 195, 240, 280, 320, 350, 400, 450],
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                tension: 0.3,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                },
+                                title: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+
+                    // Engagement chart
+                    const engagementCtx = document.getElementById('engagementChart').getContext('2d');
+                    new Chart(engagementCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                            datasets: [
+                                {
+                                    label: 'Open Rate',
+                                    data: [22, 24, 21, 25, 23, 26, 24, 25, 27, 24, 25, 28],
+                                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                                },
+                                {
+                                    label: 'Click Rate',
+                                    data: [3.2, 3.5, 3.1, 3.8, 3.4, 3.9, 3.6, 3.7, 4.1, 3.5, 3.8, 4.2],
+                                    backgroundColor: 'rgba(139, 92, 246, 0.7)',
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                },
+                                title: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+
+                    // Device chart
+                    const deviceCtx = document.getElementById('deviceChart').getContext('2d');
+                    new Chart(deviceCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Mobile', 'Desktop', 'Tablet'],
+                            datasets: [{
+                                data: [65, 25, 10],
+                                backgroundColor: [
+                                    'rgba(59, 130, 246, 0.7)',
+                                    'rgba(16, 185, 129, 0.7)',
+                                    'rgba(249, 115, 22, 0.7)'
+                                ],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                }
+                            }
+                        }
+                    });
+                };
+
+                // Load mock subscribers
+                const loadSubscribers = () => {
+                    // Generate mock data
+                    const mockSubscribers = [];
+                    const statuses = ['active', 'inactive', 'unconfirmed'];
+                    const sources = ['website', 'import', 'manual', 'api'];
+
+                    for (let i = 1; i <= 100; i++) {
+                        mockSubscribers.push({
+                            id: i,
+                            email: `subscriber${i}@example.com`,
+                            name: i % 3 === 0 ? `Subscriber ${i}` : '',
+                            status: statuses[Math.floor(Math.random() * statuses.length)],
+                            source: sources[Math.floor(Math.random() * sources.length)],
+                            subscribedAt: new Date(Date.now() - Math.floor(Math.random() * 10000000000)),
+                            openRate: Math.floor(Math.random() * 100),
+                            selected: false
+                        });
+                    }
+
+                    subscribers.value = mockSubscribers;
+                };
+
+                // Load mock campaigns
+                const loadCampaigns = () => {
+                    const statuses = ['draft', 'scheduled', 'sending', 'sent'];
+                    const mockCampaigns = [];
+
+                    for (let i = 1; i <= 12; i++) {
+                        const status = statuses[Math.floor(Math.random() * statuses.length)];
+                        const campaign = {
+                            id: i,
+                            name: `Campaign ${i}`,
+                            subject: `Newsletter #${i}: Latest Updates and News`,
+                            status: status,
+                            recipients: Math.floor(Math.random() * 2000) + 500,
+                            createdAt: new Date(Date.now() - Math.floor(Math.random() * 10000000000))
+                        };
+
+                        if (status === 'scheduled') {
+                            campaign.scheduledFor = new Date(Date.now() + Math.floor(Math.random() * 10000000000));
+                        }
+
+                        if (status === 'sent') {
+                            campaign.sentAt = new Date(Date.now() - Math.floor(Math.random() * 5000000000));
+                            campaign.openRate = Math.floor(Math.random() * 40) + 10;
+                            campaign.clickRate = Math.floor(Math.random() * 10) + 1;
+                            campaign.unsubscribeRate = (Math.random() * 0.5).toFixed(2);
+                        }
+
+                        mockCampaigns.push(campaign);
+                    }
+
+                    campaigns.value = mockCampaigns;
+                };
+
+                // Load mock templates
+                const loadTemplates = () => {
+                    const mockTemplates = [];
+
+                    for (let i = 1; i <= 9; i++) {
+                        mockTemplates.push({
+                            id: i,
+                            name: `Template ${i}`,
+                            description: `A clean and responsive email template for newsletters`,
+                            thumbnail: `https://via.placeholder.com/300x200?text=Template+${i}`,
+                            updatedAt: new Date(Date.now() - Math.floor(Math.random() * 10000000000))
+                        });
+                    }
+
+                    templates.value = mockTemplates;
+                };
+
+                // Load analytics data
+                const loadAnalyticsData = () => {
+                    // Top campaigns
+                    topCampaigns.value = campaigns.value
+                        .filter(c => c.status === 'sent')
+                        .sort((a, b) => b.openRate - a.openRate)
+                        .slice(0, 5);
+
+                    // Top links
+                    topLinks.value = [
+                        { id: 1, url: 'https://example.com/blog/post-1', title: 'How to Improve Your Email Marketing', campaign: 'Campaign 5', clicks: 342, ctr: 8.2 },
+                        { id: 2, url: 'https://example.com/products/new', title: 'New Product Launch', campaign: 'Campaign 8', clicks: 287, ctr: 6.9 },
+                        { id: 3, url: 'https://example.com/webinar', title: 'Register for Our Webinar', campaign: 'Campaign 10', clicks: 253, ctr: 6.1 },
+                        { id: 4, url: 'https://example.com/blog/post-2', title: 'Email Marketing Best Practices', campaign: 'Campaign 7', clicks: 198, ctr: 4.8 },
+                        { id: 5, url: 'https://example.com/special-offer', title: 'Limited Time Offer', campaign: 'Campaign 12', clicks: 176, ctr: 4.2 }
+                    ];
+
+                    // Most engaged subscribers
+                    mostEngagedSubscribers.value = subscribers.value
+                        .filter(s => s.status === 'active')
+                        .sort((a, b) => b.openRate - a.openRate)
+                        .slice(0, 5);
+
+                    // Recent unsubscribes
+                    recentUnsubscribes.value = [
+                        { id: 101, email: 'unsubscriber1@example.com', name: 'John Smith', unsubscribedAt: new Date(Date.now() - 86400000) },
+                        { id: 102, email: 'unsubscriber2@example.com', name: '', unsubscribedAt: new Date(Date.now() - 172800000) },
+                        { id: 103, email: 'unsubscriber3@example.com', name: 'Alice Johnson', unsubscribedAt: new Date(Date.now() - 259200000) },
+                        { id: 104, email: 'unsubscriber4@example.com', name: 'Robert Davis', unsubscribedAt: new Date(Date.now() - 345600000) },
+                        { id: 105, email: 'unsubscriber5@example.com', name: '', unsubscribedAt: new Date(Date.now() - 432000000) }
+                    ];
+                };
+
+                // Format date
+                const formatDate = (date) => {
+                    if (!date) return '';
+                    return new Date(date).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                };
+
+                // Computed properties
+                const filteredSubscribers = computed(() => {
+                    let result = [...subscribers.value];
+
+                    // Apply status filter
+                    if (filters.value.status !== 'all') {
+                        result = result.filter(s => s.status === filters.value.status);
+                    }
+
+                    // Apply source filter
+                    if (filters.value.source !== 'all') {
+                        result = result.filter(s => s.source === filters.value.source);
+                    }
+
+                    // Apply search
+                    if (searchQuery.value) {
+                        const query = searchQuery.value.toLowerCase();
+                        result = result.filter(s =>
+                            s.email.toLowerCase().includes(query) ||
+                            (s.name && s.name.toLowerCase().includes(query))
+                        );
+                    }
+
+                    return result;
+                });
+
+                const totalSubscribers = computed(() => filteredSubscribers.value.length);
+
+                const totalPages = computed(() => {
+                    return Math.ceil(totalSubscribers.value / itemsPerPage.value);
+                });
+
+                const paginatedSubscribers = computed(() => {
+                    const start = (currentPage.value - 1) * itemsPerPage.value;
+                    const end = start + itemsPerPage.value;
+                    return filteredSubscribers.value.slice(start, end);
+                });
+
+                const paginationStart = computed(() => {
+                    return totalSubscribers.value === 0 ? 0 : (currentPage.value - 1) * itemsPerPage.value + 1;
+                });
+
+                const paginationEnd = computed(() => {
+                    return Math.min(currentPage.value * itemsPerPage.value, totalSubscribers.value);
+                });
+
+                const hasSelectedSubscribers = computed(() => {
+                    return subscribers.value.some(s => s.selected);
+                });
+
+                const selectedCount = computed(() => {
+                    return subscribers.value.filter(s => s.selected).length;
+                });
+
+                const filteredCampaigns = computed(() => {
+                    if (!campaignSearchQuery.value) return campaigns.value;
+
+                    const query = campaignSearchQuery.value.toLowerCase();
+                    return campaigns.value.filter(c =>
+                        c.name.toLowerCase().includes(query) ||
+                        c.subject.toLowerCase().includes(query)
+                    );
+                });
+
+                const filteredTemplates = computed(() => {
+                    if (!templateSearchQuery.value) return templates.value;
+
+                    const query = templateSearchQuery.value.toLowerCase();
+                    return templates.value.filter(t =>
+                        t.name.toLowerCase().includes(query) ||
+                        t.description.toLowerCase().includes(query)
+                    );
+                });
+
+                // Methods
+                const applyFilters = () => {
+                    currentPage.value = 1;
+                };
+
+                const updatePagination = () => {
+                    currentPage.value = 1;
+                };
+
+                const prevPage = () => {
+                    if (currentPage.value > 1) {
+                        currentPage.value--;
+                    }
+                };
+
+                const nextPage = () => {
+                    if (currentPage.value < totalPages.value) {
+                        currentPage.value++;
+                    }
+                };
+
+                const toggleSelectAll = () => {
+                    subscribers.value.forEach(s => {
+                        s.selected = selectAll.value;
+                    });
+                };
+
+                const applyBulkAction = () => {
+                    if (!bulkAction.value) return;
+
+                    const selectedIds = subscribers.value
+                        .filter(s => s.selected)
+                        .map(s => s.id);
+
+                    if (selectedIds.length === 0) return;
+
+                    if (bulkAction.value === 'delete') {
+                        confirmDeleteSubscribers(selectedIds);
+                    } else if (bulkAction.value === 'activate') {
+                        // Activate subscribers
+                        subscribers.value.forEach(s => {
+                            if (s.selected) {
+                                s.status = 'active';
+                          s.selected = false;
+                            }
+                        });
+                        selectAll.value = false;
+                        bulkAction.value = '';
+                    } else if (bulkAction.value === 'deactivate') {
+                        // Deactivate subscribers
+                        subscribers.value.forEach(s => {
+                            if (s.selected) {
+                                s.status = 'inactive';
+                                s.selected = false;
+                            }
+                        });
+                        selectAll.value = false;
+                        bulkAction.value = '';
+                    } else if (bulkAction.value === 'export') {
+                        // Export subscribers
+                        console.log('Exporting subscribers:', selectedIds);
+                        // In a real app, this would trigger a download
+                        alert(`Exported ${selectedIds.length} subscribers`);
+                        subscribers.value.forEach(s => {
+                            if (s.selected) {
+                                s.selected = false;
+                            }
+                        });
+                        selectAll.value = false;
+                        bulkAction.value = '';
+                    }
+                };
+
+                const addSubscriber = () => {
+                    showAddSubscriberModal.value = true;
+                    subscriberForm.value = {
+                        email: '',
+                        name: '',
+                        status: 'active',
+                        customFields: [],
+                        sendConfirmation: false
+                    };
+                };
+
+                const saveSubscriber = () => {
+                    // Validate email
+                    if (!subscriberForm.value.email) {
+                        alert('Email is required');
+                        return;
+                    }
+
+                    // In a real app, this would send data to the server
+                    const newSubscriber = {
+                        id: subscribers.value.length + 1,
+                        email: subscriberForm.value.email,
+                        name: subscriberForm.value.name,
+                        status: subscriberForm.value.status,
+                        source: 'manual',
+                        subscribedAt: new Date(),
+                        openRate: 0,
+                        selected: false
+                    };
+
+                    subscribers.value.unshift(newSubscriber);
+                    showAddSubscriberModal.value = false;
+
+                    if (subscriberForm.value.sendConfirmation) {
+                        // In a real app, this would trigger a confirmation email
+                        console.log('Sending confirmation to:', subscriberForm.value.email);
+                    }
+                };
+
+                const editSubscriber = (subscriber) => {
+                    // In a real app, this would open an edit form
+                    console.log('Editing subscriber:', subscriber);
+
+                    subscriberForm.value = {
+                        id: subscriber.id,
+                        email: subscriber.email,
+                        name: subscriber.name,
+                        status: subscriber.status,
+                        customFields: [],
+                        sendConfirmation: false
+                    };
+
+                    showAddSubscriberModal.value = true;
+                };
+
+                const viewSubscriberActivity = (subscriber) => {
+                    // In a real app, this would show activity details
+                    console.log('Viewing activity for:', subscriber);
+                    alert(`Viewing activity for ${subscriber.email}`);
+                };
+
+                const confirmDeleteSubscriber = (id) => {
+                    confirmationTitle.value = 'Delete Subscriber';
+                    confirmationMessage.value = 'Are you sure you want to delete this subscriber? This action cannot be undone.';
+                    confirmButtonText.value = 'Delete';
+                    confirmCallback.value = () => deleteSubscriber(id);
+                    showConfirmationModal.value = true;
+                };
+
+                const confirmDeleteSubscribers = (ids) => {
+                    confirmationTitle.value = 'Delete Subscribers';
+                    confirmationMessage.value = `Are you sure you want to delete ${ids.length} subscribers? This action cannot be undone.`;
+                    confirmButtonText.value = 'Delete';
+                    confirmCallback.value = () => deleteSubscribers(ids);
+                    showConfirmationModal.value = true;
+                };
+
+                const deleteSubscriber = (id) => {
+                    subscribers.value = subscribers.value.filter(s => s.id !== id);
+                    showConfirmationModal.value = false;
+                };
+
+                const deleteSubscribers = (ids) => {
+                    subscribers.value = subscribers.value.filter(s => !ids.includes(s.id));
+                    selectAll.value = false;
+                    bulkAction.value = '';
+                    showConfirmationModal.value = false;
+                };
+
+                const confirmAction = () => {
+                    if (confirmCallback.value) {
+                        confirmCallback.value();
+                    }
+                };
+
+                const cancelConfirmation = () => {
+                    showConfirmationModal.value = false;
+                };
+
+                const importSubscribers = () => {
+                    // In a real app, this would process the import
+                    console.log('Importing subscribers with mapping:', importMapping.value);
+                    console.log('Custom field names:', customFieldNames.value);
+                    console.log('Import options:', importOptions.value);
+
+                    // Add some mock imported subscribers
+                    const newSubscribers = importPreview.value.rows.map((row, index) => {
+                        return {
+                            id: subscribers.value.length + index + 1,
+                            email: row[Object.keys(importMapping.value).find(key => importMapping.value[key] === 'email')] || `import${index}@example.com`,
+                            name: row[Object.keys(importMapping.value).find(key => importMapping.value[key] === 'name')] || '',
+                            status: 'active',
+                            source: 'import',
+                            subscribedAt: new Date(),
+                            openRate: 0,
+                            selected: false
+                        };
+                    });
+
+                    subscribers.value = [...newSubscribers, ...subscribers.value];
+                    showImportModal.value = false;
+
+                    alert(`Successfully imported ${newSubscribers.length} subscribers`);
+                };
+
+                const handleFileUpload = (event) => {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    // In a real app, this would parse the CSV/Excel file
+                    // For demo purposes, we'll create mock data
+
+                    const mockHeaders = ['email', 'first_name', 'last_name', 'signup_date', 'source'];
+                    const mockRows = [];
+
+                    for (let i = 1; i <= 20; i++) {
+                        mockRows.push({
+                            'email': `import${i}@example.com`,
+                            'first_name': `First${i}`,
+                            'last_name': `Last${i}`,
+                            'signup_date': '2023-01-15',
+                            'source': 'Website'
+                        });
+                    }
+
+                    importPreview.value = {
+                        headers: mockHeaders,
+                        rows: mockRows
+                    };
+
+                    // Set default mappings
+                    const defaultMapping = {
+                        'email': 'email',
+                        'first_name': 'name',
+                        'last_name': 'custom',
+                        'signup_date': 'subscribed_at',
+                        'source': 'custom'
+                    };
+
+                    importMapping.value = defaultMapping;
+
+                    customFieldNames.value = {
+                        'last_name': 'last_name',
+                        'source': 'source'
+                    };
+                };
+
+                const addCustomField = () => {
+                    subscriberForm.value.customFields.push({ name: '', value: '' });
+                };
+
+                const removeCustomField = (index) => {
+                    subscriberForm.value.customFields.splice(index, 1);
+                };
+
+                const filterCampaigns = () => {
+                    // This is handled by the computed property
+                };
+
+                const filterTemplates = () => {
+                    // This is handled by the computed property
+                };
+
+                const editCampaign = (campaign) => {
+                    // In a real app, this would open the campaign editor
+                    console.log('Editing campaign:', campaign);
+
+                    campaignForm.value = {
+                        id: campaign.id,
+                        name: campaign.name,
+                        subject: campaign.subject,
+                        fromName: 'Blog Admin',
+                        fromEmail: 'newsletter@yourblog.com',
+                        replyTo: '',
+                        templateId: '',
+                        content: 'Campaign content goes here...',
+                        recipientType: 'all',
+                        segmentId: '',
+                        deliveryType: 'immediate',
+                        scheduleDate: '',
+                        scheduleTime: ''
+                    };
+
+                    showCreateCampaignModal.value = true;
+                };
+
+                const confirmSendCampaign = (campaign) => {
+                    confirmationTitle.value = 'Send Campaign';
+                    confirmationMessage.value = `Are you sure you want to send "${campaign.name}" to ${campaign.recipients} subscribers?`;
+                    confirmButtonText.value = 'Send Now';
+                    confirmCallback.value = () => sendCampaign(campaign);
+                    showConfirmationModal.value = true;
+                };
+
+                const sendCampaign = (campaign) => {
+                    // In a real app, this would trigger sending the campaign
+                    console.log('Sending campaign:', campaign);
+
+                    const index = campaigns.value.findIndex(c => c.id === campaign.id);
+                    if (index !== -1) {
+                        campaigns.value[index].status = 'sent';
+                        campaigns.value[index].sentAt = new Date();
+                    }
+
+                    showConfirmationModal.value = false;
+                    alert(`Campaign "${campaign.name}" has been sent to ${campaign.recipients} subscribers`);
+                };
+
+                const cancelScheduledCampaign = (campaign) => {
+                    // In a real app, this would cancel the scheduled campaign
+                    console.log('Cancelling scheduled campaign:', campaign);
+
+                    const index = campaigns.value.findIndex(c => c.id === campaign.id);
+                    if (index !== -1) {
+                        campaigns.value[index].status = 'draft';
+                        delete campaigns.value[index].scheduledFor;
+                    }
+
+                    alert(`Scheduled campaign "${campaign.name}" has been cancelled and moved to drafts`);
+                };
+
+                const viewCampaignReport = (campaign) => {
+                    // In a real app, this would show the campaign report
+                    console.log('Viewing report for campaign:', campaign);
+                    alert(`Viewing report for "${campaign.name}"`);
+                };
+
+                const duplicateCampaign = (campaign) => {
+                    // In a real app, this would duplicate the campaign
+                    console.log('Duplicating campaign:', campaign);
+
+                    const newCampaign = {
+                        ...campaign,
+                        id: campaigns.value.length + 1,
+                        name: `${campaign.name} (Copy)`,
+                        status: 'draft',
+                        createdAt: new Date()
+                    };
+
+                    // Remove sent-specific properties
+                    delete newCampaign.sentAt;
+                    delete newCampaign.scheduledFor;
+                    delete newCampaign.openRate;
+                    delete newCampaign.clickRate;
+                    delete newCampaign.unsubscribeRate;
+
+                    campaigns.value.unshift(newCampaign);
+                    alert(`Campaign "${campaign.name}" has been duplicated`);
+                };
+
+                const editTemplate = (template) => {
+                    // In a real app, this would open the template editor
+                    console.log('Editing template:', template);
+
+                    templateForm.value = {
+                        id: template.id,
+                        name: template.name,
+                        description: template.description,
+                        content: `<!DOCTYPE html>
+<html>
+<head>
+    <title>${template.name}</title>
+</head>
+<body>
+    <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;">
+        <header style="background-color: #f5f5f5; padding: 20px; text-align: center;">
+            <h1 style="margin: 0; color: #333;">Your Newsletter</h1>
+        </header>
+        <main style="padding: 20px;">
+            <h2>Hello {name},</h2>
+            <div>{content}</div>
+        </main>
+        <footer style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666;">
+            <p>© 2023 Your Company. All rights reserved.</p>
+            <p><a href="{unsubscribe_url}">Unsubscribe</a></p>
+        </footer>
+    </div>
+</body>
+</html>`
+                    };
+
+                    showCreateTemplateModal.value = true;
+                };
+
+                const previewTemplate = (template) => {
+                    // In a real app, this would show a preview
+                    console.log('Previewing template:', template);
+                    alert(`Previewing template "${template.name}"`);
+                };
+
+                const useTemplateForCampaign = (template) => {
+                    // In a real app, this would pre-fill the campaign form with this template
+                    console.log('Using template for campaign:', template);
+
+                    campaignForm.value = {
+                        name: '',
+                        subject: '',
+                        fromName: 'Blog Admin',
+                        fromEmail: 'newsletter@yourblog.com',
+                        replyTo: '',
+                        templateId: template.id,
+                        content: 'Your campaign content here...',
+                        recipientType: 'all',
+                        segmentId: '',
+                        deliveryType: 'immediate',
+                        scheduleDate: '',
+                        scheduleTime: ''
+                    };
+
+                    showCreateCampaignModal.value = true;
+                };
+
+                const confirmDeleteTemplate = (id) => {
+                    confirmationTitle.value = 'Delete Template';
+                    confirmationMessage.value = 'Are you sure you want to delete this template? This action cannot be undone.';
+                    confirmButtonText.value = 'Delete';
+                    confirmCallback.value = () => deleteTemplate(id);
+                    showConfirmationModal.value = true;
+                };
+
+                const deleteTemplate = (id) => {
+                    templates.value = templates.value.filter(t => t.id !== id);
+                    showConfirmationModal.value = false;
+                };
+
+                const loadTemplate = () => {
+                    // In a real app, this would load the selected template content
+                    if (!campaignForm.value.templateId) return;
+
+                    const template = templates.value.find(t => t.id === campaignForm.value.templateId);
+                    if (template) {
+                        campaignForm.value.content = `Content for template "${template.name}" would be loaded here.`;
+                    }
+                };
+
+                const saveCampaign = () => {
+                    // Validate required fields
+                    if (!campaignForm.value.name || !campaignForm.value.subject) {
+                        alert('Campaign name and subject are required');
+                        return;
+                    }
+
+                // In a real app, this would save the campaign to the server
+                    const newCampaign = {
+                        id: campaignForm.value.id || campaigns.value.length + 1,
+                        name: campaignForm.value.name,
+                        subject: campaignForm.value.subject,
+                        status: campaignForm.value.deliveryType === 'immediate' ? 'sending' : 'scheduled',
+                        recipients: Math.floor(Math.random() * 2000) + 500,
+                        createdAt: new Date()
+                    };
+
+                    if (campaignForm.value.deliveryType === 'scheduled') {
+                        const scheduleDate = new Date(campaignForm.value.scheduleDate);
+                        const [hours, minutes] = campaignForm.value.scheduleTime.split(':');
+                        scheduleDate.setHours(parseInt(hours), parseInt(minutes));
+                        newCampaign.scheduledFor = scheduleDate;
+                    }
+
+                    if (campaignForm.value.id) {
+                        // Update existing campaign
+                        const index = campaigns.value.findIndex(c => c.id === campaignForm.value.id);
+                        if (index !== -1) {
+                            campaigns.value[index] = { ...campaigns.value[index], ...newCampaign };
+                        }
+                    } else {
+                        // Add new campaign
+                        campaigns.value.unshift(newCampaign);
+                    }
+
+                    showCreateCampaignModal.value = false;
+
+                    if (campaignForm.value.deliveryType === 'immediate') {
+                        alert(`Campaign "${newCampaign.name}" is being sent to ${newCampaign.recipients} subscribers`);
+                    } else {
+                        alert(`Campaign "${newCampaign.name}" has been scheduled for ${formatDate(newCampaign.scheduledFor)}`);
+                    }
+                };
+
+                const saveCampaignAsDraft = () => {
+                    // In a real app, this would save the campaign as a draft
+                    const newCampaign = {
+                        id: campaignForm.value.id || campaigns.value.length + 1,
+                        name: campaignForm.value.name || 'Untitled Campaign',
+                        subject: campaignForm.value.subject || 'No subject',
+                        status: 'draft',
+                        recipients: Math.floor(Math.random() * 2000) + 500,
+                        createdAt: new Date()
+                    };
+
+                    if (campaignForm.value.id) {
+                        // Update existing campaign
+                        const index = campaigns.value.findIndex(c => c.id === campaignForm.value.id);
+                        if (index !== -1) {
+                            campaigns.value[index] = { ...campaigns.value[index], ...newCampaign };
+                        }
+                    } else {
+                        // Add new campaign
+                        campaigns.value.unshift(newCampaign);
+                    }
+
+                    showCreateCampaignModal.value = false;
+                    alert(`Campaign "${newCampaign.name}" has been saved as a draft`);
+                };
+
+                const sendTestEmail = () => {
+                    // In a real app, this would send a test email
+                    const testEmail = prompt('Enter email address to send test to:');
+                    if (testEmail) {
+                        console.log('Sending test email to:', testEmail);
+                        alert(`Test email sent to ${testEmail}`);
+                    }
+                };
+
+                const saveTemplate = () => {
+                    // Validate required fields
+                    if (!templateForm.value.name || !templateForm.value.content) {
+                        alert('Template name and content are required');
+                        return;
+                    }
+
+                    // In a real app, this would save the template to the server
+                    const newTemplate = {
+                        id: templateForm.value.id || templates.value.length + 1,
+                        name: templateForm.value.name,
+                        description: templateForm.value.description,
+                        thumbnail: `https://via.placeholder.com/300x200?text=${encodeURIComponent(templateForm.value.name)}`,
+                        updatedAt: new Date()
+                    };
+
+                    if (templateForm.value.id) {
+                        // Update existing template
+                        const index = templates.value.findIndex(t => t.id === templateForm.value.id);
+                        if (index !== -1) {
+                            templates.value[index] = { ...templates.value[index], ...newTemplate };
+                        }
+                    } else {
+                        // Add new template
+                        templates.value.unshift(newTemplate);
+                    }
+
+                    showCreateTemplateModal.value = false;
+                    alert(`Template "${newTemplate.name}" has been saved`);
+                };
+
+                const updateAnalytics = () => {
+                    // In a real app, this would fetch new analytics data based on the date range
+                    console.log('Updating analytics for range:', analyticsDateRange.value);
+                    if (analyticsDateRange.value === 'custom') {
+                        console.log('Custom date range:', customDateRange.value);
+                    }
+
+                    // For demo purposes, we'll just show an alert
+                    alert(`Analytics updated for ${analyticsDateRange.value}`);
+                };
+
+                // Watch for changes
+                watch(searchQuery, () => {
+                    currentPage.value = 1;
+                });
+
+                watch(selectAll, toggleSelectAll);
+
+                return {
+                    // State
+                    activeTab,
+                    subscribers,
+                    campaigns,
+                    templates,
+                    stats,
+                    filters,
+                    searchQuery,
+                    currentPage,
+                    itemsPerPage,
+                    selectAll,
+                    bulkAction,
+                    showAddSubscriberModal,
+                    showImportModal,
+                    showCreateCampaignModal,
+                    showCreateTemplateModal,
+                    showConfirmationModal,
+                    subscriberForm,
+                    campaignForm,
+                    templateForm,
+                    importPreview,
+                    importMapping,
+                    customFieldNames,
+                    importOptions,
+                    confirmationTitle,
+                    confirmationMessage,
+                    confirmButtonText,
+                    campaignSearchQuery,
+                    templateSearchQuery,
+                    analyticsDateRange,
+                    customDateRange,
+                    topCampaigns,
+                    topLinks,
+                    mostEngagedSubscribers,
+                    recentUnsubscribes,
+
+                    // Computed
+                    filteredSubscribers,
+                    totalSubscribers,
+                    totalPages,
+                    paginatedSubscribers,
+                    paginationStart,
+                    paginationEnd,
+                    hasSelectedSubscribers,
+                    selectedCount,
+                    filteredCampaigns,
+                    filteredTemplates,
+
+                    // Methods
+                    formatDate,
+                    applyFilters,
+                    updatePagination,
+                    prevPage,
+                    nextPage,
+                    applyBulkAction,
+                    addSubscriber,
+                    saveSubscriber,
+                    editSubscriber,
+                    viewSubscriberActivity,
+                    confirmDeleteSubscriber,
+                    confirmDeleteSubscribers,
+                    deleteSubscriber,
+                    deleteSubscribers,
+                    confirmAction,
+                    cancelConfirmation,
+                    importSubscribers,
+                    handleFileUpload,
+                    addCustomField,
+                    removeCustomField,
+                    filterCampaigns,
+                    filterTemplates,
+                    editCampaign,
+                    confirmSendCampaign,
+                    sendCampaign,
+                    cancelScheduledCampaign,
+                    viewCampaignReport,
+                    duplicateCampaign,
+                    editTemplate,
+                    previewTemplate,
+                    useTemplateForCampaign,
+                    confirmDeleteTemplate,
+                    deleteTemplate,
+                    loadTemplate,
+                    saveCampaign,
+                    saveCampaignAsDraft,
+                    sendTestEmail,
+                    saveTemplate,
+                    updateAnalytics
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

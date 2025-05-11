@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Post Preview - Blog Admin</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vue 3 CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  </head>
+  <body class="bg-gray-100">
+    <div id="app" class="min-h-screen flex">
+      <!-- Sidebar -->
+      <aside class="w-64 bg-gray-800 text-white">
+        <div class="p-4 border-b border-gray-700">
+          <h2 class="text-2xl font-bold">Blog Admin</h2>
+        </div>
+        <nav class="p-2">
+          <ul>
+            <li class="mb-1">
+              <a
+                href="index.html"
+                class="block px-4 py-2 rounded hover:bg-gray-700">
+                <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+              </a>
+            </li>
+            <li class="mb-1">
+              <a
+                href="posts.html"
+                class="block px-4 py-2 rounded hover:bg-gray-700 bg-gray-700">
+                <i class="fas fa-file-alt mr-2"></i> Posts
+              </a>
+            </li>
+            <li class="mb-1">
+              <a
+                href="categories.html"
+                class="block px-4 py-2 rounded hover:bg-gray-700">
+                <i class="fas fa-folder mr-2"></i> Categories
+              </a>
+            </li>
+            <li class="mb-1">
+              <a
+                href="tags.html"
+                class="block px-4 py-2 rounded hover:bg-gray-700">
+                <i class="fas fa-tags mr-2"></i> Tags
+              </a>
+            </li>
+            <li class="mb-1">
+              <a
+                href="comments.html"
+                class="block px-4 py-2 rounded hover:bg-gray-700">
+                <i class="fas fa-comments mr-2"></i> Comments
+              </a>
+            </li>
+            <li class="mb-1">
+              <a
+                href="media.html"
+                class="block px-4 py-2 rounded hover:bg-gray-700">
+                <i class="fas fa-images mr-2"></i> Media
+              </a>
+            </li>
+            <li class="mb-1">
+              <a
+                href="users.html"
+                class="block px-4 py-2 rounded hover:bg-gray-700">
+                <i class="fas fa-users mr-2"></i> Users
+              </a>
+            </li>
+            <li class="mb-1">
+              <a
+                href="settings.html"
+                class="block px-4 py-2 rounded hover:bg-gray-700">
+                <i class="fas fa-cog mr-2"></i> Settings
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="flex-1">
+        <!-- Header -->
+        <header class="bg-white shadow p-4 flex justify-between items-center">
+          <div class="flex items-center">
+            <a href="posts.html" class="text-blue-500 hover:text-blue-700 mr-2">
+              <i class="fas fa-arrow-left"></i> Back to Posts
+            </a>
+            <h1 class="text-xl font-semibold">Post Preview</h1>
+          </div>
+          <div class="flex items-center">
+            <span class="mr-4">Welcome, Admin</span>
+            <button
+              @click="logout"
+              class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+              <i class="fas fa-sign-out-alt mr-1"></i> Logout
+            </button>
+          </div>
+        </header>
+
+        <!-- Post Content -->
+        <div class="p-6" v-if="post">
+          <!-- Action Bar -->
+          <div class="mb-6 flex justify-between items-center">
+            <div>
+              <span
+                :class="getStatusClass(post.status)"
+                class="px-3 py-1 text-sm rounded-full mr-2">
+                {{ post.status }}
+              </span>
+              <span class="text-gray-500 text-sm">
+                Published on {{ post.date }}
+              </span>
+            </div>
+            <div class="flex space-x-2">
+              <button
+                @click="editPost"
+                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center">
+                <i class="fas fa-edit mr-2"></i> Edit Post
+              </button>
+              <button
+                @click="viewPublic"
+                class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded flex items-center">
+                <i class="fas fa-globe mr-2"></i> View Public
+              </button>
+            </div>
+          </div>
+
+          <!-- Post Preview -->
+          <div class="bg-white rounded-lg shadow overflow-hidden">
+            <!-- Featured Image -->
+            <div
+              v-if="post.featuredImage"
+              class="w-full h-80 bg-gray-200 overflow-hidden">
+              <img
+                :src="post.featuredImage"
+                alt="Featured image"
+                class="w-full h-full object-cover" />
+            </div>
+
+            <!-- Post Header -->
+            <div class="p-6 border-b">
+              <h1 class="text-3xl font-bold mb-4">{{ post.title }}</h1>
+              <div
+                class="flex flex-wrap items-center text-sm text-gray-600 mb-4">
+                <div class="mr-4">
+                  <i class="fas fa-user mr-1"></i> {{ post.author }}
+                </div>
+                <div class="mr-4">
+                  <i class="fas fa-folder mr-1"></i> {{ post.category }}
+                </div>
+                <div class="mr-4">
+                  <i class="fas fa-eye mr-1"></i> {{ post.views }} views
+                </div>
+                <div class="mr-4">
+                  <i class="fas fa-thumbs-up text-green-600 mr-1"></i> {{
+                  post.likes }}
+                  <i class="fas fa-thumbs-down text-red-600 ml-2 mr-1"></i> {{
+                  post.dislikes }}
+                </div>
+                <div class="mr-4">
+                  <i class="fas fa-comments mr-1"></i> {{ post.comments ?
+                  post.comments.length : 0 }} comments
+                </div>
+              </div>
+              <div class="flex flex-wrap">
+                <span
+                  v-for="tag in post.tags"
+                  :key="tag"
+                  class="px-2 py-1 mr-2 mb-2 text-xs rounded-full bg-blue-100 text-blue-800">
+                  {{ tag }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Post Content -->
+            <div class="p-6">
+              <div class="prose max-w-none">{{ post.content }}</div>
+            </div>
+
+            <!-- Post Metadata -->
+            <div class="bg-gray-50 p-6 border-t">
+              <h3 class="text-lg font-semibold mb-3">Post Metadata</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p class="text-sm text-gray-600">
+                    <strong>Post ID:</strong> {{ post.id }}
+                  </p>
+                  <p class="text-sm text-gray-600">
+                    <strong>Created:</strong> {{ post.date }}
+                  </p>
+                  <p class="text-sm text-gray-600">
+                    <strong>Last Modified:</strong> {{ post.lastModified ||
+                    post.date }}
+                  </p>
+                  <p class="text-sm text-gray-600">
+                    <strong>Status:</strong> {{ post.status }}
+                  </p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-600">
+                    <strong>Word Count:</strong> {{ wordCount }}
+                  </p>
+                  <p class="text-sm text-gray-600">
+                    <strong>Reading Time:</strong> {{ readingTime }} min
+                  </p>
+                  <p class="text-sm text-gray-600">
+                    <strong>SEO Score:</strong>
+                    <span class="text-green-600">Good</span>
+                  </p>
+                  <p class="text-sm text-gray-600">
+                    <strong>Excerpt:</strong> {{ post.excerpt }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comments Section -->
+          <div class="mt-8">
+            <h3 class="text-xl font-semibold mb-4">
+              Comments ({{ post.comments ? post.comments.length : 0 }})
+            </h3>
+
+            <div
+              v-if="post.comments && post.comments.length > 0"
+              class="bg-white rounded-lg shadow overflow-hidden">
+              <div
+                v-for="(comment, index) in post.comments"
+                :key="index"
+                class="p-4 border-b last:border-b-0">
+                <div class="flex justify-between items-start">
+                  <div class="flex items-start">
+                    <div
+                      class="w-10 h-10 rounded-full bg-gray-300 mr-3 overflow-hidden">
+                      <img
+                        v-if="comment.avatar"
+                        :src="comment.avatar"
+                        alt="User avatar"
+                        class="w-full h-full object-cover" />
+                      <div
+                        v-else
+                        class="w-full h-full flex items-center justify-center text-gray-600">
+                        <i class="fas fa-user"></i>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="font-medium">{{ comment.author }}</div>
+                      <div class="text-sm text-gray-500">
+                        {{ comment.date }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex space-x-2">
+                    <button class="text-blue-600 hover:text-blue-800">
+                      <i class="fas fa-reply"></i>
+                    </button>
+                    <button class="text-red-600 hover:text-red-800">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="mt-2 text-gray-700">{{ comment.content }}</div>
+              </div>
+            </div>
+
+            <div
+              v-else
+              class="bg-white rounded-lg shadow p-6 text-center text-gray-500">
+              No comments yet.
+            </div>
+          </div>
+
+          <!-- Analytics Section -->
+          <div class="mt-8">
+            <h3 class="text-xl font-semibold mb-4">Post Analytics</h3>
+
+            <div class="bg-white rounded-lg shadow p-6">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-blue-50 p-4 rounded-lg">
+                  <div class="text-blue-500 text-xl font-semibold mb-1">
+                    {{ post.views }}
+                  </div>
+                  <div class="text-gray-600">Total Views</div>
+                  <div class="text-sm text-green-600 mt-2">
+                    <i class="fas fa-arrow-up mr-1"></i> 12% from last week
+                  </div>
+                </div>
+
+                <div class="bg-green-50 p-4 rounded-lg">
+                  <div class="text-green-500 text-xl font-semibold mb-1">
+                    {{ post.likes }}
+                  </div>
+                  <div class="text-gray-600">Total Likes</div>
+                  <div class="text-sm text-green-600 mt-2">
+                    <i class="fas fa-arrow-up mr-1"></i> 8% from last week
+                  </div>
+                </div>
+
+                <div class="bg-purple-50 p-4 rounded-lg">
+                  <div class="text-purple-500 text-xl font-semibold mb-1">
+                    {{ post.comments ? post.comments.length : 0 }}
+                  </div>
+                  <div class="text-gray-600">Total Comments</div>
+                  <div class="text-sm text-red-600 mt-2">
+                    <i class="fas fa-arrow-down mr-1"></i> 3% from last week
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-6">
+                <h4 class="text-lg font-medium mb-3">Traffic Sources</h4>
+                <div class="space-y-2">
+                  <div class="flex items-center">
+                    <div class="w-1/3 text-sm text-gray-600">Google</div>
+                    <div class="w-2/3">
+                      <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div
+                          class="bg-blue-600 h-2.5 rounded-full"
+                          style="width: 45%"></div>
+                      </div>
+                    </div>
+                    <div class="w-16 text-right text-sm text-gray-600">45%</div>
+                  </div>
+                  <div class="flex items-center">
+                    <div class="w-1/3 text-sm text-gray-600">Direct</div>
+                    <div class="w-2/3">
+                      <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div
+                          class="bg-blue-600 h-2.5 rounded-full"
+                          style="width: 30%"></div>
+                      </div>
+                    </div>
+                    <div class="w-16 text-right text-sm text-gray-600">30%</div>
+                  </div>
+                  <div class="flex items-center">
+                    <div class="w-1/3 text-sm text-gray-600">Social Media</div>
+                    <div class="w-2/3">
+                      <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div
+                          class="bg-blue-600 h-2.5 rounded-full"
+                          style="width: 15%"></div>
+                      </div>
+                    </div>
+                    <div class="w-16 text-right text-sm text-gray-600">15%</div>
+                  </div>
+                  <div class="flex items-center">
+                    <div class="w-1/3 text-sm text-gray-600">Other</div>
+                    <div class="w-2/3">
+                      <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div
+                          class="bg-blue-600 h-2.5 rounded-full"
+                          style="width: 10%"></div>
+                      </div>
+                    </div>
+                    <div class="w-16 text-right text-sm text-gray-600">10%</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div v-else class="p-6 flex justify-center items-center h-64">
+          <div class="text-center">
+            <i class="fas fa-spinner fa-spin text-blue-500 text-3xl mb-4"></i>
+            <p>Loading post...</p>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      const { createApp, ref, computed, onMounted } = Vue;
+
+      createApp({
+        setup() {
+          const post = ref(null);
+          const postId = ref(null);
+
+          // Get post ID from URL
+          onMounted(() => {
+            const urlParams = new URLSearchParams(window.location.search);
+            postId.value = urlParams.get("id");
+
+            if (postId.value) {
+              fetchPost(postId.value);
+            }
+          });
+
+          // Fetch post data (simulated)
+          const fetchPost = (id) => {
+            // In a real app, this would be an API call
+            // For demo purposes, we'll use sample data
+            setTimeout(() => {
+              post.value = {
+                id: parseInt(id),
+                title: "Getting Started with Vue 3",
+                author: "John Doe",
+                category: "Development",
+                tags: ["Vue", "JavaScript", "Frontend"],
+                date: "2023-06-15",
+                lastModified: "2023-06-18",
+                status: "published",
+                content: `Vue 3 is the latest major version of Vue.js, a progressive JavaScript framework for building user interfaces. It was officially released in September 2020 and comes with several new features and improvements over Vue 2.
+
+One of the most significant changes in Vue 3 is the introduction of the Composition API, which provides a more flexible way to organize and reuse code compared to the Options API used in Vue 2. The Composition API allows you to group code by logical concerns rather than option types.
+
+Here's a simple example of using the Composition API:
+
+\`\`\`javascript
+import { ref, computed, onMounted } from 'vue'
+
+export default {
+  setup() {
+    // reactive state
+    const count = ref(0)
+
+    // computed property
+    const doubleCount = computed(() => count.value * 2)
+
+    // method
+    function increment() {
+      count.value++
+    }
+
+    // lifecycle hook
+    onMounted(() => {
+      console.log('Component mounted')
+    })
+
+    // expose to template
+    return {
+      count,
+      doubleCount,
+      increment
+    }
+  }
+}
+\`\`\`
+
+Vue 3 also includes other improvements such as:
+
+1. Better TypeScript support
+2. Multiple root elements in templates
+3. Teleport component for rendering content in different parts of the DOM
+4. Fragments (no need for a single root element)
+5. Improved performance with a rewritten virtual DOM
+6. Tree-shaking support for smaller bundle sizes
+
+Getting started with Vue 3 is easy. You can use the Vue CLI to create a new project:
+
+\`\`\`bash
+npm install -g @vue/cli
+vue create my-vue3-project
+\`\`\`
+
+Or you can use Vite, which is a build tool that provides a faster and leaner development experience:
+
+\`\`\`bash
+npm init vite@latest my-vue3-project -- --template vue
+\`\`\`
+
+Vue 3 maintains most of the same syntax and concepts as Vue 2, making it relatively easy to migrate existing applications.`,
+                excerpt:
+                  "Learn the basics of Vue 3 and how to get started with this progressive JavaScript framework.",
+                featuredImage: "https://via.placeholder.com/800x400",
+                views: 1245,
+                likes: 87,
+                dislikes: 3,
+                comments: [
+                  {
+                    author: "Alice Johnson",
+                    avatar: "https://via.placeholder.com/40",
+                    date: "2023-06-16",
+                    content:
+                      "Great article! I've been using Vue 2 for a while and was wondering about the benefits of upgrading to Vue 3. This helped a lot.",
+                  },
+                  {
+                    author: "Bob Smith",
+                    avatar: "https://via.placeholder.com/40",
+                    date: "2023-06-17",
+                    content:
+                      "The Composition API looks interesting. Is it recommended to use it for all new Vue 3 projects, or is the Options API still preferred in some cases?",
+                  },
+                  {
+                    author: "Charlie Brown",
+                    avatar: "",
+                    date: "2023-06-18",
+                    content:
+                      "I'm having trouble with the TypeScript integration. Any tips for someone coming from a Vue 2 + JavaScript background?",
+                  },
+                ],
+              };
+            }, 500);
+          };
+
+          // Computed properties
+          const wordCount = computed(() => {
+            if (!post.value || !post.value.content) return 0;
+            return post.value.content.split(/\s+/).length;
+          });
+
+          const readingTime = computed(() => {
+            if (!wordCount.value) return 0;
+            return Math.ceil(wordCount.value / 200);
+          });
+
+          // Methods
+          const getStatusClass = (status) => {
+            switch (status) {
+              case "published":
+                return "bg-green-100 text-green-800";
+              case "draft":
+                return "bg-gray-100 text-gray-800";
+              case "pending":
+                return "bg-yellow-100 text-yellow-800";
+              default:
+                return "bg-gray-100 text-gray-800";
+            }
+          };
+
+          const editPost = () => {
+            // In a real app, this would navigate to the edit page
+            window.location.href = `posts.html?edit=${post.value.id}`;
+          };
+
+          const viewPublic = () => {
+            // In a real app, this would open the public view of the post
+            alert(`Opening public view of post: ${post.value.title}`);
+          };
+
+          const logout = () => {
+            alert("Logout functionality will be implemented with your backend");
+          };
+
+          return {
+            post,
+            wordCount,
+            readingTime,
+            getStatusClass,
+            editPost,
+            viewPublic,
+            logout,
+          };
+        },
+      }).mount("#app");
+    </script>
+  </body>
+</html>

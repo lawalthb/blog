@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Posts - Blog Admin</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vue 3 CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="min-h-screen flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-gray-800 text-white">
+            <div class="p-4 border-b border-gray-700">
+                <h2 class="text-2xl font-bold">Blog Admin</h2>
+            </div>
+            <nav class="p-2">
+                <ul>
+                    <li class="mb-1">
+                        <a href="index.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="posts.html" class="block px-4 py-2 rounded hover:bg-gray-700 bg-gray-700">
+                            <i class="fas fa-file-alt mr-2"></i> Posts
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="categories.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-folder mr-2"></i> Categories
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="tags.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-tags mr-2"></i> Tags
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="comments.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-comments mr-2"></i> Comments
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="media.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-images mr-2"></i> Media
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="users.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-users mr-2"></i> Users
+                        </a>
+                    </li>
+
+                    <li class="mb-1">
+                        <a href="settings.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-cog mr-2"></i> Settings
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1">
+            <!-- Header -->
+            <header class="bg-white shadow p-4 flex justify-between items-center">
+                <h1 class="text-xl font-semibold">Manage Posts</h1>
+                <div class="flex items-center">
+                    <span class="mr-4">Welcome, Admin</span>
+                    <button @click="logout" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                    </button>
+                </div>
+            </header>
+
+            <!-- Posts Content -->
+            <div class="p-6">
+                <!-- Action Bar -->
+                <div class="mb-6 flex justify-between items-center">
+                    <button @click="showAddPostModal = true" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center">
+                        <i class="fas fa-plus mr-2"></i> Add New Post
+                    </button>
+                    <div class="flex">
+                        <div class="relative mr-2">
+                            <input type="text" v-model="searchQuery" placeholder="Search posts..."
+                                class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
+                        </div>
+                        <select v-model="statusFilter" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Status</option>
+                            <option value="published">Published</option>
+                            <option value="draft">Draft</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Posts Table -->
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <input type="checkbox" v-model="selectAll" @change="toggleSelectAll"
+                                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Title
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Author
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Category
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Tags
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Views
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Likes/Dislikes
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Date
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr v-for="post in filteredPosts" :key="post.id">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <input type="checkbox" v-model="selectedPosts" :value="post.id"
+                                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">{{ post.title }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-500">{{ post.author }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-500">{{ post.category }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex flex-wrap">
+                                        <span v-for="tag in post.tags" :key="tag"
+                                            class="px-2 py-1 mr-1 mb-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                                            {{ tag }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-500">{{ post.views || 0 }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-500">
+                                        <span class="text-green-600"><i class="fas fa-thumbs-up mr-1"></i>{{ post.likes || 0 }}</span>
+                                        <span class="text-red-600 ml-2"><i class="fas fa-thumbs-down mr-1"></i>{{ post.dislikes || 0 }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-500">{{ post.date }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span :class="getStatusClass(post.status)"
+                                        class="px-2 py-1 text-xs rounded-full">
+                                        {{ post.status }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button @click="editPost(post)" class="text-blue-600 hover:text-blue-900 mr-3">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button @click="confirmDeletePost(post.id)" class="text-red-600 hover:text-red-900 mr-3">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    <a :href="'post-view.html?id=' + post.id" class="text-gray-600 hover:text-gray-900">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Bulk Actions -->
+                <div class="mt-4 flex items-center" v-if="selectedPosts.length > 0">
+                    <select v-model="bulkAction" class="border rounded px-3 py-2 mr-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Bulk Actions</option>
+                        <option value="publish">Publish</option>
+                        <option value="draft">Move to Draft</option>
+                        <option value="delete">Delete</option>
+                    </select>
+                    <button @click="applyBulkAction" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">
+                        Apply
+                    </button>
+                    <span class="ml-4 text-sm text-gray-500">{{ selectedPosts.length }} items selected</span>
+                </div>
+
+                <!-- Pagination -->
+                <div class="mt-6 flex justify-between items-center">
+                    <div class="text-sm text-gray-500">
+                        Showing {{ (currentPage - 1) * perPage + 1 }} to {{ Math.min(currentPage * perPage, totalPosts) }} of {{ totalPosts }} posts
+                    </div>
+                    <div class="flex">
+                        <button @click="prevPage" :disabled="currentPage === 1"
+                            class="px-3 py-1 border rounded mr-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                            Previous
+                        </button>
+                        <button @click="nextPage" :disabled="currentPage >= totalPages"
+                            class="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed">
+                            Next
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Add/Edit Post Modal -->
+        <div v-if="showAddPostModal || editingPost" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-screen overflow-y-auto">
+                <div class="border-b px-6 py-4 flex justify-between items-center">
+                    <h3 class="text-lg font-semibold">{{ editingPost ? 'Edit Post' : 'Add New Post' }}</h3>
+                    <button @click="closePostModal" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="title">
+                            Title
+                        </label>
+                        <input type="text" id="title" v-model="postForm.title"
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="content">
+                            Content
+                        </label>
+                        <textarea id="content" v-model="postForm.content" rows="10"
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="category">
+                                Category
+                            </label>
+                            <select id="category" v-model="postForm.category"
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                <option v-for="category in categories" :key="category" :value="category">{{ category }}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="status">
+                                Status
+                            </label>
+                            <select id="status" v-model="postForm.status"
+                                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                <option value="published">Published</option>
+                                <option value="draft">Draft</option>
+                                <option value="pending">Pending</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                            Tags
+                        </label>
+                        <div class="flex flex-wrap border rounded p-2">
+                            <div v-for="tag in availableTags" :key="tag" class="mr-2 mb-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox"
+                                        :value="tag"
+                                        v-model="postForm.tags"
+                                        class="mr-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                    {{ tag }}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                            Featured Image
+                        </label>
+                        <div class="border rounded p-4">
+                            <div v-if="postForm.featuredImage" class="mb-4">
+                                <img :src="postForm.featuredImage" alt="Featured image" class="max-h-40 mb-2">
+                                <button @click="postForm.featuredImage = ''" class="text-red-500 text-sm">
+                                    <i class="fas fa-times mr-1"></i> Remove Image
+                                </button>
+                            </div>
+                            <button @click="openMediaLibrary" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded">
+                                Select Image
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="excerpt">
+                            Excerpt
+                        </label>
+                        <textarea id="excerpt" v-model="postForm.excerpt" rows="3"
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                    </div>
+                    <div class="flex justify-end">
+                        <button @click="closePostModal" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded mr-2">
+                            Cancel
+                        </button>
+                        <button @click="savePost" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                            {{ editingPost ? 'Update' : 'Save' }} Post
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div v-if="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-md">
+                <div class="border-b px-6 py-4">
+                    <h3 class="text-lg font-semibold">Confirm Delete</h3>
+                </div>
+                <div class="p-6">
+                    <p class="mb-4">Are you sure you want to delete this post? This action cannot be undone.</p>
+                    <div class="flex justify-end">
+                        <button @click="showDeleteModal = false" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded mr-2">
+                            Cancel
+                        </button>
+                        <button @click="deletePost" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted } = Vue;
+
+        createApp({
+            setup() {
+                // Data
+                const posts = ref([
+                    {
+                        id: 1,
+                        title: 'Getting Started with Vue 3',
+                        author: 'John Doe',
+                        category: 'Development',
+                        tags: ['Vue', 'JavaScript', 'Frontend'],
+                        date: '2023-06-15',
+                        status: 'published',
+                        content: 'This is a sample post about Vue 3...',
+                        excerpt: 'Learn the basics of Vue 3 and how to get started with this progressive JavaScript framework.',
+                        featuredImage: 'https://via.placeholder.com/800x400',
+                        views: 1245,
+                        likes: 87,
+                        dislikes: 3
+                    },
+                    {
+                        id: 2,
+                        title: 'Tailwind CSS Tips and Tricks',
+                        author: 'Jane Smith',
+                        category: 'Design',
+                        tags: ['CSS', 'Tailwind', 'Design'],
+                        date: '2023-06-14',
+                        status: 'published',
+                        content: 'Here are some Tailwind CSS tips...',
+                        excerpt: 'Discover powerful Tailwind CSS techniques to improve your workflow and design process.',
+                        featuredImage: 'https://via.placeholder.com/800x400',
+                        views: 982,
+                        likes: 64,
+                        dislikes: 5
+                    },
+                    {
+                        id: 3,
+                        title: 'PHP 8 New Features',
+                        author: 'Mike Johnson',
+                        category: 'Development',
+                        tags: ['PHP', 'Backend'],
+                        date: '2023-06-12',
+                        status: 'draft',
+                        content: 'PHP 8 introduces several new features...',
+                        excerpt: 'Explore the exciting new features in PHP 8 and how they can improve your development experience.',
+                        featuredImage: '',
+                        views: 543,
+                        likes: 32,
+                        dislikes: 2
+                    },
+                    {
+                        id: 4,
+                        title: 'Responsive Design Best Practices',
+                        author: 'Sarah Williams',
+                        category: 'Design',
+                        tags: ['CSS', 'Responsive', 'Design'],
+                        date: '2023-06-10',
+                        status: 'pending',
+                        content: 'Follow these best practices for responsive design...',
+                        excerpt: 'Learn how to create truly responsive websites that work well on all devices.',
+                        featuredImage: 'https://via.placeholder.com/800x400',
+                        views: 876,
+                        likes: 45,
+                        dislikes: 1
+                    },
+                    {
+                        id: 5,
+                        title: 'JavaScript Async/Await Tutorial',
+                        author: 'John Doe',
+                        category: 'Development',
+                        tags: ['JavaScript', 'Async', 'Tutorial'],
+                        date: '2023-06-08',
+                        status: 'published',
+                        content: 'Master async/await in JavaScript...',
+                        excerpt: 'A comprehensive guide to using async/await for better asynchronous JavaScript code.',
+                        featuredImage: 'https://via.placeholder.com/800x400',
+                        views: 1532,
+                        likes: 112,
+                        dislikes: 8
+                    }
+                ]);
+
+                const categories = ref(['Development', 'Design', 'Marketing', 'Business', 'Technology']);
+                const availableTags = ref(['JavaScript', 'PHP', 'CSS', 'HTML', 'Vue', 'React', 'Angular', 'Tailwind', 'Bootstrap', 'Backend', 'Frontend', 'Design', 'Responsive', 'Tutorial', 'Async']);
+
+                // UI State
+                const searchQuery = ref('');
+                const statusFilter = ref('');
+                const selectAll = ref(false);
+                const selectedPosts = ref([]);
+                const bulkAction = ref('');
+                const currentPage = ref(1);
+                const perPage = ref(10);
+                const showAddPostModal = ref(false);
+                const editingPost = ref(false);
+                const postToDeleteId = ref(null);
+                const showDeleteModal = ref(false);
+
+                // Form
+                const postForm = ref({
+                    id: null,
+                    title: '',
+                    content: '',
+                    excerpt: '',
+                    category: 'Development',
+                    tags: [],
+                    status: 'draft',
+                    featuredImage: ''
+                });
+
+                // Computed
+                const filteredPosts = computed(() => {
+                    let result = [...posts.value];
+
+                    if (searchQuery.value) {
+                        const query = searchQuery.value.toLowerCase();
+                        result = result.filter(post =>
+                            post.title.toLowerCase().includes(query) ||
+                            post.content.toLowerCase().includes(query) ||
+                            post.author.toLowerCase().includes(query)
+                        );
+                    }
+
+                    if (statusFilter.value) {
+                        result = result.filter(post => post.status === statusFilter.value);
+                    }
+
+                    return result;
+                });
+
+                const totalPosts = computed(() => filteredPosts.value.length);
+                const totalPages = computed(() => Math.ceil(totalPosts.value / perPage.value));
+
+                // Methods
+                const getStatusClass = (status) => {
+                    switch(status) {
+                        case 'published': return 'bg-green-100 text-green-800';
+                        case 'draft': return 'bg-gray-100 text-gray-800';
+                        case 'pending': return 'bg-yellow-100 text-yellow-800';
+                        default: return 'bg-gray-100 text-gray-800';
+                    }
+                };
+
+                const toggleSelectAll = () => {
+                    if (selectAll.value) {
+                        selectedPosts.value = filteredPosts.value.map(post => post.id);
+                    } else {
+                        selectedPosts.value = [];
+                    }
+                };
+
+                const prevPage = () => {
+                    if (currentPage.value > 1) {
+                        currentPage.value--;
+                    }
+                };
+
+                const nextPage = () => {
+                    if (currentPage.value < totalPages.value) {
+                        currentPage.value++;
+                    }
+                };
+
+                const editPost = (post) => {
+                    postForm.value = { ...post };
+                    editingPost.value = true;
+                };
+
+                const closePostModal = () => {
+                    showAddPostModal.value = false;
+                    editingPost.value = false;
+                    resetPostForm();
+                };
+
+                const resetPostForm = () => {
+                    postForm.value = {
+                        id: null,
+                        title: '',
+                        content: '',
+                        excerpt: '',
+                        category: 'Development',
+                        tags: [],
+                        status: 'draft',
+                        featuredImage: ''
+                    };
+                };
+
+                const savePost = () => {
+                    if (!postForm.value.title) {
+                        alert('Post title is required');
+                        return;
+                    }
+
+                    if (editingPost.value) {
+                        // Update existing post
+                        const index = posts.value.findIndex(p => p.id === postForm.value.id);
+                        if (index !== -1) {
+                            posts.value[index] = {
+                                ...postForm.value,
+                                date: posts.value[index].date, // Preserve original date
+                                author: posts.value[index].author // Preserve original author
+                            };
+                        }
+                    } else {
+                        // Add new post
+                        const newPost = {
+                            ...postForm.value,
+                            id: posts.value.length + 1,
+                            date: new Date().toISOString().split('T')[0],
+                            author: 'Admin' // Current user name would come from auth system
+                        };
+                        posts.value.unshift(newPost);
+                    }
+
+                    closePostModal();
+                };
+
+                const confirmDeletePost = (id) => {
+                    postToDeleteId.value = id;
+                    showDeleteModal.value = true;
+                };
+
+                const deletePost = () => {
+                    posts.value = posts.value.filter(post => post.id !== postToDeleteId.value);
+                    showDeleteModal.value = false;
+                    postToDeleteId.value = null;
+
+                    // Also remove from selected posts if present
+                    selectedPosts.value = selectedPosts.value.filter(id => id !== postToDeleteId.value);
+                };
+
+                const viewPost = (id) => {
+                    // In a real app, this would navigate to the public view of the post
+                    alert(`Viewing post with ID: ${id}`);
+                };
+
+                const applyBulkAction = () => {
+                    if (!bulkAction.value || selectedPosts.value.length === 0) {
+                        return;
+                    }
+
+                    if (bulkAction.value === 'delete') {
+                        if (confirm(`Are you sure you want to delete ${selectedPosts.value.length} posts?`)) {
+                            posts.value = posts.value.filter(post => !selectedPosts.value.includes(post.id));
+                            selectedPosts.value = [];
+                        }
+                    } else {
+                        // Update status (publish or draft)
+                        posts.value = posts.value.map(post => {
+                            if (selectedPosts.value.includes(post.id)) {
+                                return { ...post, status: bulkAction.value };
+                            }
+                            return post;
+                        });
+                    }
+
+                    bulkAction.value = '';
+                    selectAll.value = false;
+                };
+
+                const openMediaLibrary = () => {
+                    // In a real app, this would open a media library modal
+                    // For now, just set a placeholder image
+                    postForm.value.featuredImage = 'https://via.placeholder.com/800x400';
+                };
+
+                const logout = () => {
+                    alert('Logout functionality will be implemented with your backend');
+                };
+
+                return {
+                    posts,
+                    categories,
+                    availableTags,
+                    searchQuery,
+                    statusFilter,
+                    selectAll,
+                    selectedPosts,
+                    bulkAction,
+                    currentPage,
+                    perPage,
+                    showAddPostModal,
+                    editingPost,
+                    postForm,
+                    showDeleteModal,
+                    filteredPosts,
+                    totalPosts,
+                    totalPages,
+                    getStatusClass,
+                    toggleSelectAll,
+                    prevPage,
+                    nextPage,
+                    editPost,
+                    closePostModal,
+                    savePost,
+                    confirmDeletePost,
+                    deletePost,
+                    viewPost,
+                    applyBulkAction,
+                    openMediaLibrary,
+                    logout
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
+

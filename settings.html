@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Blog Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.26/dist/vue.global.min.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div id="app" class="min-h-screen flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-gray-800 text-white fixed h-full">
+            <div class="p-6">
+                <h1 class="text-2xl font-semibold">Blog Admin</h1>
+            </div>
+            <nav class="mt-6">
+                <a href="index.html" class="flex items-center py-3 px-6 text-gray-300 hover:bg-gray-700 hover:text-white">
+                    <i class="fas fa-tachometer-alt mr-3"></i>
+                    Dashboard
+                </a>
+                <a href="posts.html" class="flex items-center py-3 px-6 text-gray-300 hover:bg-gray-700 hover:text-white">
+                    <i class="fas fa-file-alt mr-3"></i>
+                    Posts
+                </a>
+                <a href="comments.html" class="flex items-center py-3 px-6 text-gray-300 hover:bg-gray-700 hover:text-white">
+                    <i class="fas fa-comments mr-3"></i>
+                    Comments
+                </a>
+                <a href="categories.html" class="flex items-center py-3 px-6 text-gray-300 hover:bg-gray-700 hover:text-white">
+                    <i class="fas fa-folder mr-3"></i>
+                    Categories
+                </a>
+                <a href="users.html" class="flex items-center py-3 px-6 text-gray-300 hover:bg-gray-700 hover:text-white">
+                    <i class="fas fa-users mr-3"></i>
+                    Users
+                </a>
+                <a href="media.html" class="flex items-center py-3 px-6 text-gray-300 hover:bg-gray-700 hover:text-white">
+                    <i class="fas fa-images mr-3"></i>
+                    Media
+                </a>
+                <a href="settings.html" class="flex items-center py-3 px-6 bg-gray-700 text-white">
+                    <i class="fas fa-cog mr-3"></i>
+                    Settings
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="ml-64 flex-1">
+            <!-- Top Bar -->
+            <div class="bg-white shadow-sm">
+                <div class="flex justify-between items-center py-3 px-6">
+                    <h2 class="text-xl font-semibold">Settings</h2>
+                    <div class="flex items-center">
+                        <div class="relative mr-4">
+                            <input type="text" placeholder="Search..." class="bg-gray-100 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64">
+                            <button class="absolute right-3 top-2.5 text-gray-500">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <div class="relative">
+                            <button class="flex items-center focus:outline-none">
+                                <img src="https://via.placeholder.com/40" alt="Profile" class="w-8 h-8 rounded-full mr-2">
+                                <span>Admin User</span>
+                                <i class="fas fa-chevron-down ml-2 text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Content -->
+            <div class="p-6">
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold">General Settings</h3>
+                        <button @click="saveGeneralSettings" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                            Save Changes
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <div class="mb-4">
+                                <label for="siteName" class="block text-sm font-medium text-gray-700 mb-1">Site Name</label>
+                                <input type="text" id="siteName" v-model="generalSettings.siteName"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="siteDescription" class="block text-sm font-medium text-gray-700 mb-1">Site Description</label>
+                                <textarea id="siteDescription" v-model="generalSettings.siteDescription" rows="3"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="siteUrl" class="block text-sm font-medium text-gray-700 mb-1">Site URL</label>
+                                <input type="url" id="siteUrl" v-model="generalSettings.siteUrl"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="mb-4">
+                                <label for="adminEmail" class="block text-sm font-medium text-gray-700 mb-1">Admin Email</label>
+                                <input type="email" id="adminEmail" v-model="generalSettings.adminEmail"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="timezone" class="block text-sm font-medium text-gray-700 mb-1">Timezone</label>
+                                <select id="timezone" v-model="generalSettings.timezone"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="UTC">UTC</option>
+                                    <option value="America/New_York">Eastern Time (US & Canada)</option>
+                                    <option value="America/Chicago">Central Time (US & Canada)</option>
+                                    <option value="America/Denver">Mountain Time (US & Canada)</option>
+                                    <option value="America/Los_Angeles">Pacific Time (US & Canada)</option>
+                                    <option value="Europe/London">London</option>
+                                    <option value="Europe/Paris">Paris</option>
+                                    <option value="Asia/Tokyo">Tokyo</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="dateFormat" class="block text-sm font-medium text-gray-700 mb-1">Date Format</label>
+                                <select id="dateFormat" v-model="generalSettings.dateFormat"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="F j, Y">January 1, 2023</option>
+                                    <option value="Y-m-d">2023-01-01</option>
+                                    <option value="m/d/Y">01/01/2023</option>
+                                    <option value="d/m/Y">01/01/2023</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold">Content Settings</h3>
+                        <button @click="saveContentSettings" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                            Save Changes
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <div class="mb-4">
+                                <label for="postsPerPage" class="block text-sm font-medium text-gray-700 mb-1">Posts Per Page</label>
+                                <input type="number" id="postsPerPage" v-model="contentSettings.postsPerPage" min="1" max="50"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="defaultCategory" class="block text-sm font-medium text-gray-700 mb-1">Default Category</label>
+                                <select id="defaultCategory" v-model="contentSettings.defaultCategory"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="1">Uncategorized</option>
+                                    <option value="2">Technology</option>
+                                    <option value="3">Travel</option>
+                                    <option value="4">Food</option>
+                                    <option value="5">Lifestyle</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Comments</label>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" v-model="contentSettings.enableComments"
+                                            class="rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 mr-2">
+                                        <span class="text-sm text-gray-700">Enable comments by default</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" v-model="contentSettings.moderateComments"
+                                            class="rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 mr-2">
+                                        <span class="text-sm text-gray-700">Comments must be manually approved</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="mediaSettings" class="block text-sm font-medium text-gray-700 mb-1">Media</label>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" v-model="contentSettings.organizeMedia"
+                                            class="rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 mr-2">
+                                        <span class="text-sm text-gray-700">Organize uploads into month/year-based folders</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold">Appearance</h3>
+                        <button @click="saveAppearanceSettings" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                            Save Changes
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <div class="mb-4">
+                                <label for="theme" class="block text-sm font-medium text-gray-700 mb-1">Theme</label>
+                                <select id="theme" v-model="appearanceSettings.theme"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="default">Default Theme</option>
+                                    <option value="minimal">Minimal</option>
+                                    <option value="magazine">Magazine</option>
+                                    <option value="portfolio">Portfolio</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="primaryColor" class="block text-sm font-medium text-gray-700 mb-1">Primary Color</label>
+                                <div class="flex items-center">
+                                    <input type="color" id="primaryColor" v-model="appearanceSettings.primaryColor"
+                                        class="h-10 w-10 border rounded mr-2">
+                                    <input type="text" v-model="appearanceSettings.primaryColor"
+                                        class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="mb-4">
+                                <label for="logo" class="block text-sm font-medium text-gray-700 mb-1">Logo</label>
+                                <div class="flex items-center">
+                                    <img v-if="appearanceSettings.logoUrl" :src="appearanceSettings.logoUrl" alt="Logo" class="h-10 mr-4 border">
+                                    <button class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
+                                        Upload Logo
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                                                <label for="favicon" class="block text-sm font-medium text-gray-700 mb-1">Favicon</label>
+                                <div class="flex items-center">
+                                    <img v-if="appearanceSettings.faviconUrl" :src="appearanceSettings.faviconUrl" alt="Favicon" class="h-8 w-8 mr-4 border">
+                                    <button class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
+                                        Upload Favicon
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold">SEO Settings</h3>
+                        <button @click="saveSeoSettings" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                            Save Changes
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <div class="mb-4">
+                                <label for="metaTitle" class="block text-sm font-medium text-gray-700 mb-1">Default Meta Title</label>
+                                <input type="text" id="metaTitle" v-model="seoSettings.metaTitle"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <p class="text-xs text-gray-500 mt-1">
+                                    Recommended length: 50-60 characters
+                                </p>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="metaDescription" class="block text-sm font-medium text-gray-700 mb-1">Default Meta Description</label>
+                                <textarea id="metaDescription" v-model="seoSettings.metaDescription" rows="3"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    Recommended length: 150-160 characters
+                                </p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Search Engine Visibility</label>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" v-model="seoSettings.enableSitemap"
+                                            class="rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 mr-2">
+                                        <span class="text-sm text-gray-700">Generate XML sitemap</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" v-model="seoSettings.enableRobotsTxt"
+                                            class="rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 mr-2">
+                                        <span class="text-sm text-gray-700">Generate robots.txt file</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" v-model="seoSettings.noindexArchives"
+                                            class="rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 mr-2">
+                                        <span class="text-sm text-gray-700">Discourage search engines from indexing archives</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="googleAnalytics" class="block text-sm font-medium text-gray-700 mb-1">Google Analytics ID</label>
+                                <input type="text" id="googleAnalytics" v-model="seoSettings.googleAnalyticsId"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="UA-XXXXXXXXX-X or G-XXXXXXXXXX">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold">Social Media</h3>
+                        <button @click="saveSocialSettings" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                            Save Changes
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <div class="mb-4">
+                                <label for="facebookUrl" class="block text-sm font-medium text-gray-700 mb-1">
+                                    <i class="fab fa-facebook text-blue-600 mr-2"></i>Facebook Page URL
+                                </label>
+                                <input type="url" id="facebookUrl" v-model="socialSettings.facebookUrl"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="twitterUrl" class="block text-sm font-medium text-gray-700 mb-1">
+                                    <i class="fab fa-twitter text-blue-400 mr-2"></i>Twitter Profile URL
+                                </label>
+                                <input type="url" id="twitterUrl" v-model="socialSettings.twitterUrl"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="instagramUrl" class="block text-sm font-medium text-gray-700 mb-1">
+                                    <i class="fab fa-instagram text-pink-600 mr-2"></i>Instagram Profile URL
+                                </label>
+                                <input type="url" id="instagramUrl" v-model="socialSettings.instagramUrl"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="mb-4">
+                                <label for="linkedinUrl" class="block text-sm font-medium text-gray-700 mb-1">
+                                    <i class="fab fa-linkedin text-blue-700 mr-2"></i>LinkedIn URL
+                                </label>
+                                <input type="url" id="linkedinUrl" v-model="socialSettings.linkedinUrl"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="youtubeUrl" class="block text-sm font-medium text-gray-700 mb-1">
+                                    <i class="fab fa-youtube text-red-600 mr-2"></i>YouTube Channel URL
+                                </label>
+                                <input type="url" id="youtubeUrl" v-model="socialSettings.youtubeUrl"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="pinterestUrl" class="block text-sm font-medium text-gray-700 mb-1">
+                                    <i class="fab fa-pinterest text-red-500 mr-2"></i>Pinterest URL
+                                </label>
+                                <input type="url" id="pinterestUrl" v-model="socialSettings.pinterestUrl"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Social Sharing</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" v-model="socialSettings.enableSocialSharing"
+                                    class="rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 mr-2">
+                                <span class="text-sm text-gray-700">Enable social sharing buttons on posts</span>
+                            </label>
+                            <div v-if="socialSettings.enableSocialSharing" class="pl-6 mt-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" v-model="socialSettings.shareFacebook"
+                                        class="rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 mr-2">
+                                    <span class="text-sm text-gray-700">Facebook</span>
+                                </label>
+                                <label class="flex items-center mt-1">
+                                    <input type="checkbox" v-model="socialSettings.shareTwitter"
+                                        class="rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 mr-2">
+                                    <span class="text-sm text-gray-700">Twitter</span>
+                                </label>
+                                <label class="flex items-center mt-1">
+                                    <input type="checkbox" v-model="socialSettings.shareLinkedIn"
+                                        class="rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 mr-2">
+                                    <span class="text-sm text-gray-700">LinkedIn</span>
+                                </label>
+                                <label class="flex items-center mt-1">
+                                    <input type="checkbox" v-model="socialSettings.sharePinterest"
+                                        class="rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 mr-2">
+                                    <span class="text-sm text-gray-700">Pinterest</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold">Advanced Settings</h3>
+                        <button @click="saveAdvancedSettings" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                            Save Changes
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <div class="mb-4">
+                                <label for="cacheEnabled" class="block text-sm font-medium text-gray-700 mb-1">Caching</label>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="cacheEnabled" v-model="advancedSettings.cacheEnabled"
+                                            class="rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 mr-2">
+                                        <span class="text-sm text-gray-700">Enable page caching</span>
+                                    </label>
+                                </div>
+                                <div v-if="advancedSettings.cacheEnabled" class="mt-2">
+                                    <label for="cacheTTL" class="block text-sm font-medium text-gray-700 mb-1">Cache Duration (minutes)</label>
+                                    <input type="number" id="cacheTTL" v-model="advancedSettings.cacheTTL" min="1"
+                                        class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="maintenanceMode" class="block text-sm font-medium text-gray-700 mb-1">Maintenance Mode</label>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="maintenanceMode" v-model="advancedSettings.maintenanceMode"
+                                            class="rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 mr-2">
+                                        <span class="text-sm text-gray-700">Enable maintenance mode</span>
+                                    </label>
+                                </div>
+                                <div v-if="advancedSettings.maintenanceMode" class="mt-2">
+                                    <label for="maintenanceMessage" class="block text-sm font-medium text-gray-700 mb-1">Maintenance Message</label>
+                                    <textarea id="maintenanceMessage" v-model="advancedSettings.maintenanceMessage" rows="3"
+                                        class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="mb-4">
+                                <label for="customCss" class="block text-sm font-medium text-gray-700 mb-1">Custom CSS</label>
+                                <textarea id="customCss" v-model="advancedSettings.customCss" rows="6"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"></textarea>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="headerScripts" class="block text-sm font-medium text-gray-700 mb-1">Header Scripts</label>
+                                <textarea id="headerScripts" v-model="advancedSettings.headerScripts" rows="3"
+                                                                       class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"></textarea>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    These scripts will be added to the <head> section of your site.
+                                </p>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="footerScripts" class="block text-sm font-medium text-gray-700 mb-1">Footer Scripts</label>
+                                <textarea id="footerScripts" v-model="advancedSettings.footerScripts" rows="3"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"></textarea>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    These scripts will be added just before the closing </body> tag.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold">Backup & Export</h3>
+                        <div class="space-x-2">
+                            <button @click="createBackup" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                                Create Backup
+                            </button>
+                            <button @click="exportData" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                Export Data
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <h4 class="text-md font-medium mb-3">Available Backups</h4>
+                        <div class="bg-gray-50 border rounded-lg overflow-hidden">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Filename
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Date Created
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Size
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr v-for="backup in backups" :key="backup.id">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            {{ backup.filename }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ formatDate(backup.createdAt) }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ backup.size }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 space-x-2">
+                                            <button @click="downloadBackup(backup)" class="text-blue-600 hover:text-blue-800">
+                                                <i class="fas fa-download"></i> Download
+                                            </button>
+                                            <button @click="restoreBackup(backup)" class="text-green-600 hover:text-green-800">
+                                                <i class="fas fa-undo"></i> Restore
+                                            </button>
+                                            <button @click="confirmDeleteBackup(backup)" class="text-red-600 hover:text-red-800">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr v-if="backups.length === 0">
+                                        <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">
+                                            No backups available
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-md font-medium mb-3">Import Data</h4>
+                        <div class="border rounded-lg p-4 bg-gray-50">
+                            <p class="text-sm text-gray-600 mb-3">
+                                Import data from a previous export or backup. This will overwrite your current data.
+                            </p>
+                            <div class="flex items-center">
+                                <input type="file" id="importFile" class="hidden" @change="handleImportFile">
+                                <label for="importFile" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 cursor-pointer">
+                                    Select File
+                                </label>
+                                <span v-if="importFileName" class="ml-3 text-sm text-gray-600">
+                                    {{ importFileName }}
+                                </span>
+                            </div>
+                            <button v-if="importFileName" @click="importData" class="mt-3 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                Import Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Confirmation Modal -->
+        <div v-if="showConfirmationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+                <h3 class="text-lg font-semibold mb-4">{{ confirmationTitle }}</h3>
+                <p class="text-gray-600 mb-6">{{ confirmationMessage }}</p>
+                <div class="flex justify-end space-x-3">
+                    <button @click="cancelConfirmation" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
+                        Cancel
+                    </button>
+                    <button @click="confirmAction" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                        {{ confirmButtonText }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div v-if="showToast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded shadow-lg z-50 flex items-center">
+            <i :class="toastIcon" class="mr-2"></i>
+            {{ toastMessage }}
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted, computed } = Vue;
+
+        createApp({
+            setup() {
+                // General settings
+                const generalSettings = ref({
+                    siteName: 'My Awesome Blog',
+                    siteDescription: 'A blog about technology, travel, and lifestyle',
+                    siteUrl: 'https://myblog.com',
+                    adminEmail: 'admin@myblog.com',
+                    timezone: 'UTC',
+                    dateFormat: 'F j, Y'
+                });
+
+                // Content settings
+                const contentSettings = ref({
+                    postsPerPage: 10,
+                    defaultCategory: '1',
+                    enableComments: true,
+                    moderateComments: true,
+                    organizeMedia: true
+                });
+
+                // Appearance settings
+                const appearanceSettings = ref({
+                    theme: 'default',
+                    primaryColor: '#3b82f6',
+                    logoUrl: 'https://via.placeholder.com/200x60?text=Blog+Logo',
+                    faviconUrl: 'https://via.placeholder.com/32x32'
+                });
+
+                // SEO settings
+                const seoSettings = ref({
+                    metaTitle: 'My Awesome Blog | Technology, Travel, and Lifestyle',
+                    metaDescription: 'Discover the latest in technology, travel tips, and lifestyle advice on My Awesome Blog.',
+                    enableSitemap: true,
+                    enableRobotsTxt: true,
+                    noindexArchives: false,
+                    googleAnalyticsId: ''
+                });
+
+                // Social media settings
+                const socialSettings = ref({
+                    facebookUrl: 'https://facebook.com/myblog',
+                    twitterUrl: 'https://twitter.com/myblog',
+                    instagramUrl: 'https://instagram.com/myblog',
+                    linkedinUrl: '',
+                    youtubeUrl: '',
+                    pinterestUrl: '',
+                    enableSocialSharing: true,
+                    shareFacebook: true,
+                    shareTwitter: true,
+                    shareLinkedIn: true,
+                    sharePinterest: false
+                });
+
+                // Advanced settings
+                const advancedSettings = ref({
+                    cacheEnabled: true,
+                    cacheTTL: 60,
+                    maintenanceMode: false,
+                    maintenanceMessage: 'We are currently performing maintenance. Please check back soon.',
+                    customCss: '/* Add your custom CSS here */\n\n/* Example: */\n.site-header {\n  background-color: #f8f9fa;\n}',
+                    headerScripts: '',
+                    footerScripts: ''
+                });
+
+                // Backups
+                const backups = ref([
+                    {
+                        id: 1,
+                        filename: 'backup-2023-06-15.zip',
+                        createdAt: '2023-06-15T10:30:00',
+                        size: '4.2 MB'
+                    },
+                    {
+                        id: 2,
+                        filename: 'backup-2023-06-01.zip',
+                        createdAt: '2023-06-01T08:15:00',
+                        size: '4.1 MB'
+                    },
+                    {
+                        id: 3,
+                        filename: 'backup-2023-05-15.zip',
+                        createdAt: '2023-05-15T14:45:00',
+                        size: '3.9 MB'
+                    }
+                ]);
+
+                // Import file
+                const importFileName = ref('');
+
+                // Confirmation modal
+                const showConfirmationModal = ref(false);
+                const confirmationTitle = ref('');
+                const confirmationMessage = ref('');
+                const confirmButtonText = ref('');
+                const confirmCallback = ref(null);
+
+                // Toast notification
+                const showToast = ref(false);
+                const toastMessage = ref('');
+                const toastIcon = ref('fas fa-check');
+
+                // Format date
+                const formatDate = (dateString) => {
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                };
+
+                // Show toast notification
+                const showToastNotification = (message, type = 'success') => {
+                    toastMessage.value = message;
+
+                    if (type === 'success') {
+                        toastIcon.value = 'fas fa-check';
+                    } else if (type === 'error') {
+                        toastIcon.value = 'fas fa-exclamation-circle';
+                    } else if (type === 'info') {
+                        toastIcon.value = 'fas fa-info-circle';
+                    }
+
+                    showToast.value = true;
+
+                    setTimeout(() => {
+                        showToast.value = false;
+                    }, 3000);
+                };
+
+                // Save settings methods
+                const saveGeneralSettings = () => {
+                    // In a real app, this would send data to the server
+                    console.log('Saving general settings:', generalSettings.value);
+                    showToastNotification('General settings saved successfully');
+                };
+
+                const saveContentSettings = () => {
+                    console.log('Saving content settings:', contentSettings.value);
+                    showToastNotification('Content settings saved successfully');
+                };
+
+                const saveAppearanceSettings = () => {
+                    console.log('Saving appearance settings:', appearanceSettings.value);
+                    showToastNotification('Appearance settings saved successfully');
+                };
+
+                const saveSeoSettings = () => {
+                    console.log('Saving SEO settings:', seoSettings.value);
+                    showToastNotification('SEO settings saved successfully');
+                };
+
+                const saveSocialSettings = () => {
+                    console.log('Saving social media settings:', socialSettings.value);
+                    showToastNotification('Social media settings saved successfully');
+                };
+
+                const saveAdvancedSettings = () => {
+                    console.log('Saving advanced settings:', advancedSettings.value);
+                    showToastNotification('Advanced settings saved successfully');
+                };
+
+                // Backup methods
+                const createBackup = () => {
+                    // In a real app, this would create a backup on the server
+                    const now = new Date();
+                    const newBackup = {
+                        id: backups.value.length + 1,
+                        filename: `backup-${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}.zip`,
+                        createdAt: now.toISOString(),
+                        size: '4.3 MB'
+                    };
+
+                    backups.value.unshift(newBackup);
+                    showToastNotification('Backup created successfully');
+                };
+
+                const downloadBackup = (backup) => {
+                    // In a real app, this would trigger a download
+                    console.log('Downloading backup:', backup);
+                    showToastNotification('Backup download started', 'info');
+                };
+
+                const restoreBackup = (backup) => {
+                    confirmationTitle.value = 'Restore Backup';
+                    confirmationMessage.value = `Are you sure you want to restore from "${backup.filename}"? This will overwrite your current data.`;
+                    confirmButtonText.value = 'Restore';
+                 confirmCallback.value = () => {
+                        // In a real app, this would restore from the backup
+                        console.log('Restoring from backup:', backup);
+                        showConfirmationModal.value = false;
+                        showToastNotification('Backup restored successfully');
+                    };
+                    showConfirmationModal.value = true;
+                };
+
+                const confirmDeleteBackup = (backup) => {
+                    confirmationTitle.value = 'Delete Backup';
+                    confirmationMessage.value = `Are you sure you want to delete "${backup.filename}"? This action cannot be undone.`;
+                    confirmButtonText.value = 'Delete';
+                    confirmCallback.value = () => {
+                        deleteBackup(backup);
+                    };
+                    showConfirmationModal.value = true;
+                };
+
+                const deleteBackup = (backup) => {
+                    backups.value = backups.value.filter(b => b.id !== backup.id);
+                    showConfirmationModal.value = false;
+                    showToastNotification('Backup deleted successfully');
+                };
+
+                // Export and import methods
+                const exportData = () => {
+                    // In a real app, this would generate and download an export file
+                    console.log('Exporting data');
+                    showToastNotification('Data export started', 'info');
+                };
+
+                const handleImportFile = (event) => {
+                    const file = event.target.files[0];
+                    if (file) {
+                        importFileName.value = file.name;
+                    }
+                };
+
+                const importData = () => {
+                    confirmationTitle.value = 'Import Data';
+                    confirmationMessage.value = 'Are you sure you want to import this data? This will overwrite your current data.';
+                    confirmButtonText.value = 'Import';
+                    confirmCallback.value = () => {
+                        // In a real app, this would process the import file
+                        console.log('Importing data from:', importFileName.value);
+                        showConfirmationModal.value = false;
+                        showToastNotification('Data imported successfully');
+                        importFileName.value = '';
+                    };
+                    showConfirmationModal.value = true;
+                };
+
+                // Confirmation modal methods
+                const confirmAction = () => {
+                    if (confirmCallback.value) {
+                        confirmCallback.value();
+                    }
+                };
+
+                const cancelConfirmation = () => {
+                    showConfirmationModal.value = false;
+                };
+
+                // Load settings on mount
+                onMounted(() => {
+                    // In a real app, this would fetch settings from the server
+                    console.log('Settings page loaded');
+                });
+
+                return {
+                    // Settings
+                    generalSettings,
+                    contentSettings,
+                    appearanceSettings,
+                    seoSettings,
+                    socialSettings,
+                    advancedSettings,
+
+                    // Backups
+                    backups,
+                    importFileName,
+
+                    // Modal
+                    showConfirmationModal,
+                    confirmationTitle,
+                    confirmationMessage,
+                    confirmButtonText,
+
+                    // Toast
+                    showToast,
+                    toastMessage,
+                    toastIcon,
+
+                    // Methods
+                    formatDate,
+                    saveGeneralSettings,
+                    saveContentSettings,
+                    saveAppearanceSettings,
+                    saveSeoSettings,
+                    saveSocialSettings,
+                    saveAdvancedSettings,
+                    createBackup,
+                    downloadBackup,
+                    restoreBackup,
+                    confirmDeleteBackup,
+                    exportData,
+                    handleImportFile,
+                    importData,
+                    confirmAction,
+                    cancelConfirmation
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

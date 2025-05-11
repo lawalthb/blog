@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Comments - Blog Admin</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vue 3 CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="min-h-screen flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-gray-800 text-white">
+            <div class="p-4 border-b border-gray-700">
+                <h2 class="text-2xl font-bold">Blog Admin</h2>
+            </div>
+            <nav class="p-2">
+                <ul>
+                    <li class="mb-1">
+                        <a href="index.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="posts.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-file-alt mr-2"></i> Posts
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="categories.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-folder mr-2"></i> Categories
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="tags.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-tags mr-2"></i> Tags
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="comments.html" class="block px-4 py-2 rounded hover:bg-gray-700 bg-gray-700">
+                            <i class="fas fa-comments mr-2"></i> Comments
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="media.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-images mr-2"></i> Media
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="users.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-users mr-2"></i> Users
+                        </a>
+                    </li>
+                   
+                    <li class="mb-1">
+                        <a href="settings.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-cog mr-2"></i> Settings
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1">
+            <!-- Header -->
+            <header class="bg-white shadow p-4 flex justify-between items-center">
+                <h1 class="text-xl font-semibold">Manage Comments</h1>
+                <div class="flex items-center">
+                    <span class="mr-4">Welcome, Admin</span>
+                    <button @click="logout" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                    </button>
+                </div>
+            </header>
+
+            <!-- Comments Content -->
+            <div class="p-6">
+                <!-- Filters and Search -->
+                <div class="bg-white rounded-lg shadow p-6 mb-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex flex-wrap items-center gap-4">
+                            <div>
+                                <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                <select id="statusFilter" v-model="filters.status" @change="applyFilters"
+                                    class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="all">All</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="spam">Spam</option>
+                                    <option value="trash">Trash</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="postFilter" class="block text-sm font-medium text-gray-700 mb-1">Post</label>
+                                <select id="postFilter" v-model="filters.post" @change="applyFilters"
+                                    class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="all">All Posts</option>
+                                    <option v-for="post in posts" :key="post.id" :value="post.id">
+                                        {{ post.title }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="dateFilter" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                                <select id="dateFilter" v-model="filters.date" @change="applyFilters"
+                                    class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="all">All Dates</option>
+                                    <option value="today">Today</option>
+                                    <option value="last7days">Last 7 Days</option>
+                                    <option value="last30days">Last 30 Days</option>
+                                    <option value="thisMonth">This Month</option>
+                                    <option value="lastMonth">Last Month</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <input type="text" v-model="searchQuery" @input="applyFilters" placeholder="Search comments..."
+                                class="border rounded px-3 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64">
+                            <i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bulk Actions -->
+                <div class="bg-white rounded-lg shadow mb-6">
+                    <div class="p-4 border-b flex items-center justify-between">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="selectAll" v-model="selectAll" @change="toggleSelectAll"
+                                class="mr-2 rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                            <label for="selectAll" class="text-sm text-gray-700">Select All</label>
+
+                            <div v-if="hasSelectedComments" class="ml-4 flex items-center">
+                                <select v-model="bulkAction" class="border rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                                    <option value="">Bulk Actions</option>
+                                    <option value="approve">Approve</option>
+                                    <option value="unapprove">Unapprove</option>
+                                    <option value="spam">Mark as Spam</option>
+                                    <option value="trash">Move to Trash</option>
+                                    <option value="delete">Delete Permanently</option>
+                                </select>
+                                <button @click="applyBulkAction" :disabled="!bulkAction"
+                                    class="ml-2 px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 disabled:opacity-50 text-sm">
+                                    Apply
+                                </button>
+                                <span class="ml-4 text-sm text-gray-600">{{ selectedCount }} items selected</span>
+                            </div>
+                        </div>
+
+                        <div class="text-sm text-gray-600">
+                            Showing {{ paginationStart }} - {{ paginationEnd }} of {{ totalComments }} comments
+                        </div>
+                    </div>
+
+                    <!-- Comments Table -->
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
+                                        <span class="sr-only">Select</span>
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Author
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Comment
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        In Response To
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Submitted On
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Status
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr v-for="comment in paginatedComments" :key="comment.id" :class="{'bg-blue-50': comment.selected}">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <input type="checkbox" v-model="comment.selected" class="rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <img v-if="comment.authorAvatar" :src="comment.authorAvatar" alt="Author avatar" class="h-8 w-8 rounded-full mr-2">
+                                            <div v-else class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center mr-2">
+                                                <i class="fas fa-user text-gray-500"></i>
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-medium text-gray-900">{{ comment.authorName }}</div>
+                                                <div class="text-xs text-gray-500">{{ comment.authorEmail }}</div>
+                                                <div v-if="comment.authorWebsite" class="text-xs text-blue-500">
+                                                    <a :href="comment.authorWebsite" target="_blank">{{ comment.authorWebsite }}</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="text-sm text-gray-900">{{ comment.content }}</div>
+                                        <div class="mt-2 flex space-x-2 text-xs">
+                                            <button @click="approveComment(comment.id)" v-if="comment.status !== 'approved'" class="text-green-600 hover:text-green-900">
+                                                Approve
+                                            </button>
+                                            <button @click="unapproveComment(comment.id)" v-if="comment.status === 'approved'" class="text-yellow-600 hover:text-yellow-900">
+                                                Unapprove
+                                            </button>
+                                            <button @click="replyToComment(comment.id)" class="text-blue-600 hover:text-blue-900">
+                                                Reply
+                                            </button>
+                                            <button @click="editComment(comment.id)" class="text-blue-600 hover:text-blue-900">
+                                                Edit
+                                            </button>
+                                            <button @click="markAsSpam(comment.id)" v-if="comment.status !== 'spam'" class="text-orange-600 hover:text-orange-900">
+                                                Spam
+                                            </button>
+                                            <button @click="moveToTrash(comment.id)" v-if="comment.status !== 'trash'" class="text-red-600 hover:text-red-900">
+                                                Trash
+                                            </button>
+                                            <button @click="confirmDeleteComment(comment.id)" v-if="comment.status === 'trash'" class="text-red-600 hover:text-red-900">
+                                                Delete Permanently
+                                            </button>
+                                        </div>
+                                        <div v-if="comment.id === replyingToId" class="mt-3">
+                                            <textarea v-model="replyContent" rows="2" class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Write your reply..."></textarea>
+                                            <div class="mt-2 flex justify-end space-x-2">
+                                                <button @click="cancelReply" class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 text-xs">
+                                                    Cancel
+                                                </button>
+                                                                                               <button @click="submitReply" class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-xs">
+                                                    Submit Reply
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div v-if="comment.id === editingId" class="mt-3">
+                                            <textarea v-model="editContent" rows="2" class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                                            <div class="mt-2 flex justify-end space-x-2">
+                                                <button @click="cancelEdit" class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 text-xs">
+                                                    Cancel
+                                                </button>
+                                                <button @click="saveEdit" class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-xs">
+                                                    Save
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <a :href="`posts.html?id=${comment.postId}`" class="text-blue-600 hover:text-blue-900 text-sm">
+                                            {{ getPostTitle(comment.postId) }}
+                                        </a>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ formatDate(comment.createdAt) }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span :class="[
+                                            'px-2 py-1 text-xs rounded-full',
+                                            comment.status === 'approved' ? 'bg-green-100 text-green-800' :
+                                            comment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                            comment.status === 'spam' ? 'bg-orange-100 text-orange-800' :
+                                            comment.status === 'trash' ? 'bg-red-100 text-red-800' : ''
+                                        ]">
+                                            {{ comment.status.charAt(0).toUpperCase() + comment.status.slice(1) }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr v-if="paginatedComments.length === 0">
+                                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                        No comments found matching your criteria.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="px-6 py-4 border-t flex items-center justify-between">
+                        <div>
+                            <select v-model="commentsPerPage" @change="updatePagination"
+                                class="border rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                                <option :value="10">10 per page</option>
+                                <option :value="25">25 per page</option>
+                                <option :value="50">50 per page</option>
+                                <option :value="100">100 per page</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button @click="prevPage" :disabled="currentPage === 1"
+                                class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 disabled:opacity-50 text-sm">
+                                <i class="fas fa-chevron-left mr-1"></i> Previous
+                            </button>
+                            <div class="text-sm text-gray-600">
+                                Page {{ currentPage }} of {{ totalPages }}
+                            </div>
+                            <button @click="nextPage" :disabled="currentPage === totalPages"
+                                class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 disabled:opacity-50 text-sm">
+                                Next <i class="fas fa-chevron-right ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Delete Confirmation Modal -->
+        <div v-if="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-md">
+                <div class="border-b px-6 py-4">
+                    <h3 class="text-lg font-semibold">Confirm Delete</h3>
+                </div>
+                <div class="p-6">
+                    <p class="mb-4">Are you sure you want to permanently delete this comment? This action cannot be undone.</p>
+                    <div class="flex justify-end">
+                        <button @click="showDeleteModal = false" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded mr-2">
+                            Cancel
+                        </button>
+                        <button @click="deleteComment" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, watch } = Vue;
+
+        createApp({
+            setup() {
+                // Data
+                const comments = ref([
+                    {
+                        id: 1,
+                        authorName: 'John Smith',
+                        authorEmail: 'john.smith@example.com',
+                        authorWebsite: 'https://johnsmith.com',
+                        authorAvatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+                        content: 'This is a great article! I learned a lot from it and will definitely be applying these techniques in my projects.',
+                        postId: 1,
+                        parentId: null,
+                        status: 'approved',
+                        createdAt: '2023-06-18T14:30:00',
+                        selected: false
+                    },
+                    {
+                        id: 2,
+                        authorName: 'Jane Doe',
+                        authorEmail: 'jane.doe@example.com',
+                        authorWebsite: '',
+                        authorAvatar: 'https://randomuser.me/api/portraits/women/2.jpg',
+                        content: 'I have a question about the third point you made. Could you elaborate more on how to implement that in a real-world scenario?',
+                        postId: 1,
+                        parentId: null,
+                        status: 'approved',
+                        createdAt: '2023-06-18T15:45:00',
+                        selected: false
+                    },
+                    {
+                        id: 3,
+                        authorName: 'Admin',
+                        authorEmail: 'admin@example.com',
+                        authorWebsite: '',
+                        authorAvatar: '',
+                        content: 'Thanks for your question, Jane! I\'ve added a new section to the article that goes into more detail about real-world implementation.',
+                        postId: 1,
+                        parentId: 2,
+                        status: 'approved',
+                        createdAt: '2023-06-18T16:20:00',
+                        selected: false
+                    },
+                    {
+                        id: 4,
+                        authorName: 'Mike Johnson',
+                        authorEmail: 'mike@example.com',
+                        authorWebsite: 'https://mikejohnson.dev',
+                        authorAvatar: 'https://randomuser.me/api/portraits/men/3.jpg',
+                        content: 'I disagree with your approach. I think there are better ways to solve this problem.',
+                        postId: 2,
+                        parentId: null,
+                        status: 'pending',
+                        createdAt: '2023-06-19T09:15:00',
+                        selected: false
+                    },
+                    {
+                        id: 5,
+                        authorName: 'Sarah Williams',
+                        authorEmail: 'sarah@example.com',
+                        authorWebsite: '',
+                        authorAvatar: 'https://randomuser.me/api/portraits/women/4.jpg',
+                        content: 'This article changed my perspective on web development. Thank you for sharing your insights!',
+                        postId: 3,
+                        parentId: null,
+                        status: 'approved',
+                        createdAt: '2023-06-19T11:30:00',
+                        selected: false
+                    },
+                    {
+                        id: 6,
+                        authorName: 'Buy Cheap Watches',
+                        authorEmail: 'spam@example.com',
+                        authorWebsite: 'https://fakespamsite.com',
+                        authorAvatar: '',
+                        content: 'Check out our amazing deals on luxury watches! Visit our website for more information.',
+                        postId: 2,
+                        parentId: null,
+                        status: 'spam',
+                        createdAt: '2023-06-20T03:45:00',
+                        selected: false
+                    },
+                    {
+                        id: 7,
+                        authorName: 'Robert Brown',
+                        authorEmail: 'robert@example.com',
+                        authorWebsite: '',
+                        authorAvatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+                        content: 'I found a typo in the second paragraph. It should be "their" not "there".',
+                        postId: 4,
+                        parentId: null,
+                        status: 'approved',
+                        createdAt: '2023-06-20T10:15:00',
+                        selected: false
+                    },
+                    {
+                        id: 8,
+                        authorName: 'Emily Davis',
+                        authorEmail: 'emily@example.com',
+                        authorWebsite: 'https://emilydavis.net',
+                        authorAvatar: 'https://randomuser.me/api/portraits/women/6.jpg',
+                        content: 'I\'ve been following your blog for years and this is one of your best articles yet!',
+                        postId: 5,
+                        parentId: null,
+                        status: 'approved',
+                        createdAt: '2023-06-21T14:20:00',
+                        selected: false
+                    },
+                    {
+                        id: 9,
+                        authorName: 'David Wilson',
+                        authorEmail: 'david@example.com',
+                        authorWebsite: '',
+                        authorAvatar: 'https://randomuser.me/api/portraits/men/7.jpg',
+                        content: 'This comment has been moved to trash for testing purposes.',
+                        postId: 3,
+                        parentId: null,
+                        status: 'trash',
+                        createdAt: '2023-06-22T09:30:00',
+                        selected: false
+                    }
+                ]);
+
+                const posts = ref([
+                    { id: 1, title: 'Getting Started with Vue 3' },
+                    { id: 2, title: 'Tailwind CSS Tips and Tricks' },
+                    { id: 3, title: 'JavaScript Async/Await Tutorial' },
+                    { id: 4, title: 'Responsive Design Best Practices' },
+                    { id: 5, title: 'PHP 8 New Features' }
+                ]);
+
+                const filters = ref({
+                    status: 'all',
+                    post: 'all',
+                    date: 'all'
+                });
+
+                const searchQuery = ref('');
+                const currentPage = ref(1);
+                const commentsPerPage = ref(10);
+                const selectAll = ref(false);
+                const bulkAction = ref('');
+                const showDeleteModal = ref(false);
+                const commentToDeleteId = ref(null);
+                const replyingToId = ref(null);
+                const replyContent = ref('');
+                const editingId = ref(null);
+                const editContent = ref('');
+
+                // Computed
+                const filteredComments = computed(() => {
+                    let result = [...comments.value];
+
+                    // Apply status filter
+                    if (filters.value.status !== 'all') {
+                        result = result.filter(comment => comment.status === filters.value.status);
+                    }
+
+                    // Apply post filter
+                    if (filters.value.post !== 'all') {
+                        const postId = parseInt(filters.value.post);
+                        result = result.filter(comment => comment.postId === postId);
+                    }
+
+                    // Apply date filter
+                    if (filters.value.date !== 'all') {
+                        const now = new Date();
+                        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+                        if (filters.value.date === 'today') {
+                            result = result.filter(comment => {
+                                const commentDate = new Date(comment.createdAt);
+                                return commentDate >= today && commentDate < new Date(today.getTime() + 86400000);
+                            });
+                        } else if (filters.value.date === 'last7days') {
+                            const last7Days = new Date(today.getTime() - 6 * 86400000);
+                            result = result.filter(comment => {
+                                const commentDate = new Date(comment.createdAt);
+                                return commentDate >= last7Days;
+                            });
+                        } else if (filters.value.date === 'last30days') {
+                            const last30Days = new Date(today.getTime() - 29 * 86400000);
+                            result = result.filter(comment => {
+                                const commentDate = new Date(comment.createdAt);
+                                return commentDate >= last30Days;
+                            });
+                        } else if (filters.value.date === 'thisMonth') {
+                            const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                            result = result.filter(comment => {
+                                const commentDate = new Date(comment.createdAt);
+                                return commentDate >= firstDayOfMonth;
+                            });
+                        } else if (filters.value.date === 'lastMonth') {
+                            const firstDayOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                            const firstDayOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                            result = result.filter(comment => {
+                                const commentDate = new Date(comment.createdAt);
+                                return commentDate >= firstDayOfLastMonth && commentDate < firstDayOfThisMonth;
+                            });
+                        }
+                    }
+
+                                      // Apply search query
+                    if (searchQuery.value) {
+                        const query = searchQuery.value.toLowerCase();
+                        result = result.filter(comment =>
+                            comment.authorName.toLowerCase().includes(query) ||
+                            comment.authorEmail.toLowerCase().includes(query) ||
+                            comment.content.toLowerCase().includes(query)
+                        );
+                    }
+
+                    return result;
+                });
+
+                const totalComments = computed(() => filteredComments.value.length);
+
+                const totalPages = computed(() => {
+                    return Math.ceil(totalComments.value / commentsPerPage.value);
+                });
+
+                const paginatedComments = computed(() => {
+                    const start = (currentPage.value - 1) * commentsPerPage.value;
+                    const end = start + commentsPerPage.value;
+                    return filteredComments.value.slice(start, end);
+                });
+
+                const paginationStart = computed(() => {
+                    if (totalComments.value === 0) return 0;
+                    return (currentPage.value - 1) * commentsPerPage.value + 1;
+                });
+
+                const paginationEnd = computed(() => {
+                    if (totalComments.value === 0) return 0;
+                    return Math.min(currentPage.value * commentsPerPage.value, totalComments.value);
+                });
+
+                const hasSelectedComments = computed(() => {
+                    return comments.value.some(comment => comment.selected);
+                });
+
+                const selectedCount = computed(() => {
+                    return comments.value.filter(comment => comment.selected).length;
+                });
+
+                // Methods
+                const applyFilters = () => {
+                    currentPage.value = 1; // Reset to first page when filters change
+                };
+
+                const updatePagination = () => {
+                    currentPage.value = 1; // Reset to first page when items per page changes
+                };
+
+                const prevPage = () => {
+                    if (currentPage.value > 1) {
+                        currentPage.value--;
+                    }
+                };
+
+                const nextPage = () => {
+                    if (currentPage.value < totalPages.value) {
+                        currentPage.value++;
+                    }
+                };
+
+                const toggleSelectAll = () => {
+                    paginatedComments.value.forEach(comment => {
+                        comment.selected = selectAll.value;
+                    });
+                };
+
+                const applyBulkAction = () => {
+                    if (!bulkAction.value) return;
+
+                    const selectedCommentIds = comments.value
+                        .filter(comment => comment.selected)
+                        .map(comment => comment.id);
+
+                    if (selectedCommentIds.length === 0) return;
+
+                    if (bulkAction.value === 'approve') {
+                        comments.value.forEach(comment => {
+                            if (selectedCommentIds.includes(comment.id)) {
+                                comment.status = 'approved';
+                            }
+                        });
+                    } else if (bulkAction.value === 'unapprove') {
+                        comments.value.forEach(comment => {
+                            if (selectedCommentIds.includes(comment.id)) {
+                                comment.status = 'pending';
+                            }
+                        });
+                    } else if (bulkAction.value === 'spam') {
+                        comments.value.forEach(comment => {
+                            if (selectedCommentIds.includes(comment.id)) {
+                                comment.status = 'spam';
+                            }
+                        });
+                    } else if (bulkAction.value === 'trash') {
+                        comments.value.forEach(comment => {
+                            if (selectedCommentIds.includes(comment.id)) {
+                                comment.status = 'trash';
+                            }
+                        });
+                    } else if (bulkAction.value === 'delete') {
+                        comments.value = comments.value.filter(comment => !selectedCommentIds.includes(comment.id));
+                    }
+
+                    // Reset
+                    selectAll.value = false;
+                    bulkAction.value = '';
+                };
+
+                const approveComment = (id) => {
+                    const comment = comments.value.find(c => c.id === id);
+                    if (comment) {
+                        comment.status = 'approved';
+                    }
+                };
+
+                const unapproveComment = (id) => {
+                    const comment = comments.value.find(c => c.id === id);
+                    if (comment) {
+                        comment.status = 'pending';
+                    }
+                };
+
+                const replyToComment = (id) => {
+                    // Close any open edit forms
+                    editingId.value = null;
+
+                    // Toggle reply form
+                    if (replyingToId.value === id) {
+                        replyingToId.value = null;
+                        replyContent.value = '';
+                    } else {
+                        replyingToId.value = id;
+                        replyContent.value = '';
+                    }
+                };
+
+                const cancelReply = () => {
+                    replyingToId.value = null;
+                    replyContent.value = '';
+                };
+
+                const submitReply = () => {
+                    if (!replyContent.value.trim()) return;
+
+                    const parentComment = comments.value.find(c => c.id === replyingToId.value);
+                    if (!parentComment) return;
+
+                    const newId = Math.max(0, ...comments.value.map(c => c.id)) + 1;
+                    const newComment = {
+                        id: newId,
+                        authorName: 'Admin',
+                        authorEmail: 'admin@example.com',
+                        authorWebsite: '',
+                        authorAvatar: '',
+                        content: replyContent.value.trim(),
+                        postId: parentComment.postId,
+                        parentId: parentComment.id,
+                        status: 'approved',
+                        createdAt: new Date().toISOString(),
+                        selected: false
+                    };
+
+                    comments.value.push(newComment);
+
+                    // Reset
+                    replyingToId.value = null;
+                    replyContent.value = '';
+                };
+
+                const editComment = (id) => {
+                    // Close any open reply forms
+                    replyingToId.value = null;
+
+                    const comment = comments.value.find(c => c.id === id);
+                    if (comment) {
+                        editingId.value = id;
+                        editContent.value = comment.content;
+                    }
+                };
+
+                const cancelEdit = () => {
+                    editingId.value = null;
+                    editContent.value = '';
+                };
+
+                const saveEdit = () => {
+                    if (!editContent.value.trim()) return;
+
+                    const comment = comments.value.find(c => c.id === editingId.value);
+                    if (comment) {
+                        comment.content = editContent.value.trim();
+                    }
+
+                    // Reset
+                    editingId.value = null;
+                    editContent.value = '';
+                };
+
+                const markAsSpam = (id) => {
+                    const comment = comments.value.find(c => c.id === id);
+                    if (comment) {
+                        comment.status = 'spam';
+                    }
+                };
+
+                const moveToTrash = (id) => {
+                    const comment = comments.value.find(c => c.id === id);
+                    if (comment) {
+                        comment.status = 'trash';
+                    }
+                };
+
+                const confirmDeleteComment = (id) => {
+                    commentToDeleteId.value = id;
+                    showDeleteModal.value = true;
+                };
+
+                const deleteComment = () => {
+                    comments.value = comments.value.filter(comment => comment.id !== commentToDeleteId.value);
+                    showDeleteModal.value = false;
+                    commentToDeleteId.value = null;
+                };
+
+                const getPostTitle = (postId) => {
+                    const post = posts.value.find(p => p.id === postId);
+                    return post ? post.title : 'Unknown Post';
+                };
+
+                const formatDate = (dateString) => {
+                    if (!dateString) return '';
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                };
+
+                const logout = () => {
+                    alert('Logout functionality will be implemented with your backend');
+                };
+
+                // Watch for changes in selection
+                watch(paginatedComments, () => {
+                    // Update selectAll checkbox based on whether all visible comments are selected
+                    selectAll.value = paginatedComments.value.length > 0 &&
+                        paginatedComments.value.every(comment => comment.selected);
+                }, { deep: true });
+
+                return {
+                    comments,
+                    posts,
+                    filters,
+                    searchQuery,
+                    currentPage,
+                    commentsPerPage,
+                    selectAll,
+                    bulkAction,
+                    showDeleteModal,
+                    commentToDeleteId,
+                    replyingToId,
+                    replyContent,
+                    editingId,
+                    editContent,
+                    filteredComments,
+                    totalComments,
+                    totalPages,
+                    paginatedComments,
+                    paginationStart,
+                    paginationEnd,
+                    hasSelectedComments,
+                    selectedCount,
+                    applyFilters,
+                    updatePagination,
+                    prevPage,
+                    nextPage,
+                    toggleSelectAll,
+                    applyBulkAction,
+                    approveComment,
+                    unapproveComment,
+                    replyToComment,
+                    cancelReply,
+                    submitReply,
+                    editComment,
+                    cancelEdit,
+                    saveEdit,
+                    markAsSpam,
+                    moveToTrash,
+                    confirmDeleteComment,
+                    deleteComment,
+                    getPostTitle,
+                    formatDate,
+                    logout
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users - Blog Admin</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vue 3 CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="min-h-screen flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-gray-800 text-white">
+            <div class="p-4 border-b border-gray-700">
+                <h2 class="text-2xl font-bold">Blog Admin</h2>
+            </div>
+            <nav class="p-2">
+                <ul>
+                    <li class="mb-1">
+                        <a href="index.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="posts.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-file-alt mr-2"></i> Posts
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="categories.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-folder mr-2"></i> Categories
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="tags.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-tags mr-2"></i> Tags
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="comments.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-comments mr-2"></i> Comments
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="media.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-images mr-2"></i> Media
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="users.html" class="block px-4 py-2 rounded hover:bg-gray-700 bg-gray-700">
+                            <i class="fas fa-users mr-2"></i> Users
+                        </a>
+                    </li>
+                   
+                    <li class="mb-1">
+                        <a href="settings.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-cog mr-2"></i> Settings
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1">
+            <!-- Header -->
+            <header class="bg-white shadow p-4 flex justify-between items-center">
+                <h1 class="text-xl font-semibold">Users</h1>
+                <div class="flex items-center">
+                    <span class="mr-4">Welcome, Admin</span>
+                    <button @click="logout" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                    </button>
+                </div>
+            </header>
+
+            <!-- Users Content -->
+            <div class="p-6">
+                <!-- Filters and Add User -->
+                <div class="bg-white rounded-lg shadow p-6 mb-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <button @click="showAddUserModal = true" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                <i class="fas fa-user-plus mr-1"></i> Add New User
+                            </button>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-4">
+                            <div>
+                                <label for="roleFilter" class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                                <select id="roleFilter" v-model="filters.role" @change="applyFilters"
+                                    class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="all">All Roles</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="editor">Editor</option>
+                                    <option value="author">Author</option>
+                                    <option value="contributor">Contributor</option>
+                                    <option value="subscriber">Subscriber</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                <select id="statusFilter" v-model="filters.status" @change="applyFilters"
+                                    class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="all">All Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            </div>
+                            <div class="relative">
+                                <label for="searchUsers" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                                <input type="text" id="searchUsers" v-model="searchQuery" @input="applyFilters" placeholder="Search users..."
+                                    class="border rounded px-3 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64">
+                                <i class="fas fa-search absolute left-3 top-9 text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users Table -->
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <div class="flex justify-between items-center p-4 border-b">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="selectAll" v-model="selectAll" @change="toggleSelectAll"
+                                class="mr-2 rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                            <label for="selectAll" class="text-sm text-gray-700">Select All</label>
+
+                            <div v-if="hasSelectedUsers" class="ml-4 flex items-center">
+                                <select v-model="bulkAction" class="border rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                                    <option value="">Bulk Actions</option>
+                                    <option value="activate">Activate</option>
+                                    <option value="deactivate">Deactivate</option>
+                                    <option value="delete">Delete</option>
+                                </select>
+                                <button @click="applyBulkAction" :disabled="!bulkAction"
+                                    class="ml-2 px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 disabled:opacity-50 text-sm">
+                                    Apply
+                                </button>
+                                <span class="ml-4 text-sm text-gray-600">{{ selectedCount }} users selected</span>
+                            </div>
+                        </div>
+
+                        <div class="text-sm text-gray-600">
+                            Showing {{ paginationStart }} - {{ paginationEnd }} of {{ totalUsers }} users
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
+                                        <span class="sr-only">Select</span>
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        User
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Role
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Posts
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Comments
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Status
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Registered
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Last Active
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr v-for="user in paginatedUsers" :key="user.id" :class="{'bg-blue-50': user.selected}">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <input type="checkbox" v-model="user.selected" class="rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="h-10 w-10 flex-shrink-0 mr-3">
+                                                <img v-if="user.avatar" :src="user.avatar" :alt="user.name" class="h-10 w-10 rounded-full object-cover">
+                                                <div v-else class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                                    <i class="fas fa-user text-gray-500"></i>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-medium text-gray-900">{{ user.name }}</div>
+                                                <div class="text-xs text-gray-500">{{ user.email }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span :class="[
+                                            'px-2 py-1 text-xs rounded-full',
+                                            user.role === 'admin' ? 'bg-red-100 text-red-800' :
+                                            user.role === 'editor' ? 'bg-purple-100 text-purple-800' :
+                                            user.role === 'author' ? 'bg-blue-100 text-blue-800' :
+                                            user.role === 'contributor' ? 'bg-green-100 text-green-800' :
+                                            'bg-gray-100 text-gray-800'
+                                        ]">
+                                            {{ user.role.charAt(0).toUpperCase() + user.role.slice(1) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ user.postCount }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ user.commentCount }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span :class="[
+                                            'px-2 py-1 text-xs rounded-full',
+                                            user.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                                        ]">
+                                            {{ user.status.charAt(0).toUpperCase() + user.status.slice(1) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ formatDate(user.registeredAt) }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ formatDate(user.lastActiveAt) }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <button @click="editUser(user)" class="text-blue-600 hover:text-blue-900 mr-2">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button @click="viewUserActivity(user)" class="text-blue-600 hover:text-blue-900 mr-2">
+                                            <i class="fas fa-chart-line"></i>
+                                        </button>
+                                                                                <button @click="viewUserActivity(user)" class="text-blue-600 hover:text-blue-900 mr-2">
+                                            <i class="fas fa-chart-line"></i>
+                                        </button>
+                                        <button @click="confirmDeleteUser(user.id)" class="text-red-600 hover:text-red-900">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr v-if="paginatedUsers.length === 0">
+                                    <td colspan="9" class="px-6 py-4 text-center text-gray-500">
+                                        No users found matching your criteria.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="px-6 py-4 flex items-center justify-between border-t">
+                        <div>
+                            <select v-model="itemsPerPage" @change="updatePagination"
+                                class="border rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                                <option :value="10">10 per page</option>
+                                <option :value="25">25 per page</option>
+                                <option :value="50">50 per page</option>
+                                <option :value="100">100 per page</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button @click="prevPage" :disabled="currentPage === 1"
+                                class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 disabled:opacity-50 text-sm">
+                                <i class="fas fa-chevron-left mr-1"></i> Previous
+                            </button>
+                            <div class="text-sm text-gray-600">
+                                Page {{ currentPage }} of {{ totalPages }}
+                            </div>
+                            <button @click="nextPage" :disabled="currentPage === totalPages"
+                                class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 disabled:opacity-50 text-sm">
+                                Next <i class="fas fa-chevron-right ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Add/Edit User Modal -->
+        <div v-if="showAddUserModal || showEditUserModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl">
+                <div class="border-b px-6 py-4 flex justify-between items-center">
+                    <h3 class="text-lg font-semibold">{{ showEditUserModal ? 'Edit User' : 'Add New User' }}</h3>
+                    <button @click="closeUserModal" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <form @submit.prevent="saveUser">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="userName" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                                <input type="text" id="userName" v-model="userForm.name" required
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="userEmail" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                <input type="email" id="userEmail" v-model="userForm.email" required
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="userRole" class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                                <select id="userRole" v-model="userForm.role" required
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="admin">Admin</option>
+                                    <option value="editor">Editor</option>
+                                    <option value="author">Author</option>
+                                    <option value="contributor">Contributor</option>
+                                    <option value="subscriber">Subscriber</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="userStatus" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                <select id="userStatus" v-model="userForm.status" required
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            </div>
+                            <div v-if="!showEditUserModal">
+                                <label for="userPassword" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                                <input type="password" id="userPassword" v-model="userForm.password" required
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div v-if="!showEditUserModal">
+                                <label for="userConfirmPassword" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                                <input type="password" id="userConfirmPassword" v-model="userForm.confirmPassword" required
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div v-if="showEditUserModal">
+                                <label for="userNewPassword" class="block text-sm font-medium text-gray-700 mb-1">New Password (leave blank to keep current)</label>
+                                <input type="password" id="userNewPassword" v-model="userForm.newPassword"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div v-if="showEditUserModal">
+                                <label for="userConfirmNewPassword" class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                                <input type="password" id="userConfirmNewPassword" v-model="userForm.confirmNewPassword"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="userBio" class="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                                <textarea id="userBio" v-model="userForm.bio" rows="3"
+                                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Profile Picture</label>
+                                <div class="flex items-center">
+                                    <div class="h-16 w-16 mr-4 flex-shrink-0">
+                                        <img v-if="userForm.avatar" :src="userForm.avatar" alt="Avatar Preview" class="h-16 w-16 rounded-full object-cover">
+                                        <div v-else class="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center">
+                                            <i class="fas fa-user text-gray-500"></i>
+                                        </div>
+                                    </div>
+                                    <label class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 cursor-pointer">
+                                        <span>Choose File</span>
+                                        <input type="file" @change="handleAvatarUpload" accept="image/*" class="hidden">
+                                    </label>
+                                    <button v-if="userForm.avatar" @click="removeAvatar" type="button" class="ml-2 text-red-600 hover:text-red-800">
+                                        <i class="fas fa-times"></i> Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 flex justify-end space-x-3">
+                            <button type="button" @click="closeUserModal" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                {{ showEditUserModal ? 'Update User' : 'Add User' }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Activity Modal -->
+        <div v-if="showActivityModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl">
+                <div class="border-b px-6 py-4 flex justify-between items-center">
+                    <h3 class="text-lg font-semibold">User Activity - {{ selectedUser.name }}</h3>
+                    <button @click="showActivityModal = false" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <!-- User Stats -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <div class="text-blue-500 text-xl font-semibold">{{ selectedUser.postCount }}</div>
+                            <div class="text-gray-600">Posts</div>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <div class="text-green-500 text-xl font-semibold">{{ selectedUser.commentCount }}</div>
+                            <div class="text-gray-600">Comments</div>
+                        </div>
+                        <div class="bg-purple-50 p-4 rounded-lg">
+                            <div class="text-purple-500 text-xl font-semibold">{{ formatDate(selectedUser.registeredAt) }}</div>
+                            <div class="text-gray-600">Registered</div>
+                        </div>
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            <div class="text-yellow-500 text-xl font-semibold">{{ formatDate(selectedUser.lastActiveAt) }}</div>
+                            <div class="text-gray-600">Last Active</div>
+                        </div>
+                    </div>
+
+                    <!-- Activity Tabs -->
+                    <div class="border-b mb-6">
+                        <nav class="flex -mb-px">
+                            <button @click="activityTab = 'posts'" :class="[
+                                'py-2 px-4 text-sm font-medium border-b-2 focus:outline-none',
+                                activityTab === 'posts'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            ]">
+                                Recent Posts
+                            </button>
+                            <button @click="activityTab = 'comments'" :class="[
+                                'py-2 px-4 text-sm font-medium border-b-2 focus:outline-none',
+                                activityTab === 'comments'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            ]">
+                                Recent Comments
+                            </button>
+                            <button @click="activityTab = 'logins'" :class="[
+                                'py-2 px-4 text-sm font-medium border-b-2 focus:outline-none',
+                                activityTab === 'logins'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            ]">
+                                Login History
+                            </button>
+                        </nav>
+                    </div>
+
+                    <!-- Recent Posts Tab -->
+                    <div v-if="activityTab === 'posts'">
+                        <div v-if="userActivity.posts.length === 0" class="text-center py-8 text-gray-500">
+                            This user hasn't published any posts yet.
+                        </div>
+                        <div v-else class="space-y-4">
+                            <div v-for="post in userActivity.posts" :key="post.id" class="border rounded-lg p-4">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h4 class="font-medium text-lg">{{ post.title }}</h4>
+                                        <div class="text-sm text-gray-500 mt-1">
+                                            {{ formatDate(post.publishedAt) }} • {{ post.status }}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <a :href="`posts.html?id=${post.id}`" class="text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <p class="mt-2 text-gray-600">{{ post.excerpt }}</p>
+                                <div class="mt-2 flex items-center text-sm text-gray-500">
+                                                                     <span class="mr-3"><i class="far fa-eye mr-1"></i> {{ post.views }}</span>
+                                    <span class="mr-3"><i class="far fa-comment mr-1"></i> {{ post.commentCount }}</span>
+                                    <span><i class="far fa-heart mr-1"></i> {{ post.likes }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Comments Tab -->
+                    <div v-if="activityTab === 'comments'">
+                        <div v-if="userActivity.comments.length === 0" class="text-center py-8 text-gray-500">
+                            This user hasn't made any comments yet.
+                        </div>
+                        <div v-else class="space-y-4">
+                            <div v-for="comment in userActivity.comments" :key="comment.id" class="border rounded-lg p-4">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <div class="text-sm text-gray-500">
+                                            On post: <a :href="`posts.html?id=${comment.postId}`" class="text-blue-600 hover:underline">{{ comment.postTitle }}</a>
+                                        </div>
+                                        <div class="text-sm text-gray-500 mt-1">
+                                            {{ formatDate(comment.createdAt) }} • {{ comment.status }}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <a :href="`comments.html?id=${comment.id}`" class="text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <p class="mt-2 text-gray-600">{{ comment.content }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Login History Tab -->
+                    <div v-if="activityTab === 'logins'">
+                        <div v-if="userActivity.logins.length === 0" class="text-center py-8 text-gray-500">
+                            No login history available for this user.
+                        </div>
+                        <div v-else>
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Date & Time
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            IP Address
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Device
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Browser
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Location
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr v-for="login in userActivity.logins" :key="login.id">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ formatDate(login.timestamp) }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ login.ipAddress }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ login.device }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ login.browser }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ login.location }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div v-if="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-md">
+                <div class="border-b px-6 py-4">
+                    <h3 class="text-lg font-semibold">Confirm Delete</h3>
+                </div>
+                <div class="p-6">
+                    <p class="mb-4">Are you sure you want to permanently delete {{ deleteMultiple ? 'these users' : 'this user' }}? This action cannot be undone.</p>
+                    <div class="flex justify-end">
+                        <button @click="showDeleteModal = false" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded mr-2">
+                            Cancel
+                        </button>
+                        <button @click="deleteUser" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, watch } = Vue;
+
+        createApp({
+            setup() {
+                // Data
+                const users = ref([
+                    {
+                        id: 1,
+                        name: 'John Doe',
+                        email: 'john.doe@example.com',
+                        role: 'admin',
+                        status: 'active',
+                        avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+                        bio: 'Blog administrator and content strategist with over 10 years of experience.',
+                        postCount: 42,
+                        commentCount: 156,
+                        registeredAt: '2022-01-15T10:30:00',
+                        lastActiveAt: '2023-07-15T14:22:00',
+                        selected: false
+                    },
+                    {
+                        id: 2,
+                        name: 'Jane Smith',
+                        email: 'jane.smith@example.com',
+                        role: 'editor',
+                        status: 'active',
+                        avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
+                        bio: 'Senior editor specializing in technology and science topics.',
+                        postCount: 38,
+                        commentCount: 92,
+                        registeredAt: '2022-02-20T09:15:00',
+                        lastActiveAt: '2023-07-14T16:45:00',
+                        selected: false
+                    },
+                    {
+                        id: 3,
+                        name: 'Robert Johnson',
+                        email: 'robert.johnson@example.com',
+                        role: 'author',
+                        status: 'active',
+                        avatar: 'https://randomuser.me/api/portraits/men/3.jpg',
+                        bio: 'Tech writer and software developer sharing insights on programming and web development.',
+                        postCount: 27,
+                        commentCount: 64,
+                        registeredAt: '2022-03-10T11:45:00',
+                        lastActiveAt: '2023-07-13T10:20:00',
+                        selected: false
+                    },
+                    {
+                        id: 4,
+                        name: 'Emily Davis',
+                        email: 'emily.davis@example.com',
+                        role: 'contributor',
+                        status: 'active',
+                        avatar: 'https://randomuser.me/api/portraits/women/4.jpg',
+                        bio: 'Freelance writer focusing on lifestyle and wellness topics.',
+                        postCount: 15,
+                        commentCount: 48,
+                        registeredAt: '2022-04-05T14:30:00',
+                        lastActiveAt: '2023-07-10T09:15:00',
+                        selected: false
+                    },
+                    {
+                        id: 5,
+                        name: 'Michael Wilson',
+                        email: 'michael.wilson@example.com',
+                        role: 'subscriber',
+                        status: 'inactive',
+                        avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+                        bio: 'Regular reader and commenter on technology articles.',
+                        postCount: 0,
+                        commentCount: 37,
+                        registeredAt: '2022-05-12T08:20:00',
+                        lastActiveAt: '2023-06-28T15:40:00',
+                        selected: false
+                    },
+                    {
+                        id: 6,
+                        name: 'Sarah Brown',
+                        email: 'sarah.brown@example.com',
+                        role: 'author',
+                        status: 'active',
+                        avatar: 'https://randomuser.me/api/portraits/women/6.jpg',
+                        bio: 'Food blogger and recipe developer with a passion for healthy eating.',
+                        postCount: 22,
+                        commentCount: 58,
+                        registeredAt: '2022-06-18T13:10:00',
+                        lastActiveAt: '2023-07-12T11:30:00',
+                        selected: false
+                    },
+                    {
+                        id: 7,
+                        name: 'David Miller',
+                        email: 'david.miller@example.com',
+                        role: 'editor',
+                        status: 'active',
+                        avatar: 'https://randomuser.me/api/portraits/men/7.jpg',
+                        bio: 'Editor specializing in business and finance topics.',
+                        postCount: 31,
+                        commentCount: 76,
+                        registeredAt: '2022-07-22T10:45:00',
+                        lastActiveAt: '2023-07-14T13:25:00',
+                        selected: false
+                    },
+                    {
+                        id: 8,
+                        name: 'Lisa Taylor',
+                        email: 'lisa.taylor@example.com',
+                        role: 'contributor',
+                        status: 'active',
+                        avatar: 'https://randomuser.me/api/portraits/women/8.jpg',
+                        bio: 'Travel writer sharing experiences from around the world.',
+                        postCount: 18,
+                        commentCount: 42,
+                        registeredAt: '2022-08-15T09:30:00',
+                        lastActiveAt: '2023-07-11T16:50:00',
+                        selected: false
+                    },
+                    {
+                        id: 9,
+                        name: 'James Anderson',
+                        email: 'james.anderson@example.com',
+                        role: 'subscriber',
+                        status: 'inactive',
+                        avatar: 'https://randomuser.me/api/portraits/men/9.jpg',
+                        bio: 'Avid reader and commenter on various blog topics.',
+                        postCount: 0,
+                        commentCount: 29,
+                        registeredAt: '2022-09-10T15:20:00',
+                        lastActiveAt: '2023-06-20T10:15:00',
+                        selected: false
+                    },
+                    {
+                        id: 10,
+                        name: 'Jennifer White',
+                        email: 'jennifer.white@example.com',
+                        role: 'author',
+                        status: 'active',
+                        avatar: 'https://randomuser.me/api/portraits/women/10.jpg',
+                        bio: 'Fashion blogger and style consultant sharing trends and tips.',
+                        postCount: 24,
+                        commentCount: 67,
+                        registeredAt: '2022-10-05T11:10:00',
+                        lastActiveAt: '2023-07-13T14:40:00',
+                        selected: false
+                    },
+                    {
+                        id: 11,
+                        name: 'Thomas Clark',
+                        email: 'thomas.clark@example.com',
+                        role: 'contributor',
+                        status: 'active',
+                        avatar: 'https://randomuser.me/api/portraits/men/11.jpg',
+                        bio: 'Sports writer covering major leagues and events.',
+                        postCount: 16,
+                        commentCount: 38,
+                        registeredAt: '2022-11-12T13:45:00',
+                        lastActiveAt: '2023-07-10T11:20:00',
+                        selected: false
+                    },
+                    {
+                        id: 12,
+                        name: 'Amanda Lewis',
+                        email: 'amanda.lewis@example.com',
+                        role: 'subscriber',
+                        status: 'active',
+                        avatar: 'https://randomuser.me/api/portraits/women/12.jpg',
+                        bio: 'Engaged reader and active commenter on health and wellness topics.',
+                        postCount: 0,
+                        commentCount: 45,
+                        registeredAt: '2022-12-08T10:30:00',
+                        lastActiveAt: '2023-07-12T09:15:00',
+                        selected: false
+                    }
+                ]);
+
+                const filters = ref({
+                    role: 'all',
+                    status: 'all'
+                });
+
+                const searchQuery = ref('');
+                const currentPage = ref(1);
+                const itemsPerPage = ref(10);
+                const selectAll = ref(false);
+                const bulkAction = ref('');
+
+                const showAddUserModal = ref(false);
+                const showEditUserModal = ref(false);
+                const showActivityModal = ref(false);
+                const showDeleteModal = ref(false);
+
+                const userForm = ref({
+                    id: null,
+                    name: '',
+                    email: '',
+                    role: 'subscriber',
+                    status: 'active',
+                    password: '',
+                    confirmPassword: '',
+                    newPassword: '',
+                    confirmNewPassword: '',
+                    bio: '',
+                    avatar: ''
+                });
+
+                const selectedUser = ref({});
+                const userToDeleteId = ref(null);
+                const deleteMultiple = ref(false);
+                const activityTab = ref('posts');
+
+                // Sample user activity data
+                const userActivity = ref({
+                    posts: [
+                        {
+                            id: 101,
+                            title: 'Getting Started with Vue.js 3',
+                            excerpt: 'Learn the basics of Vue.js 3 and how to create your first application with the Composition API.',
+                                                       publishedAt: '2023-07-10T09:30:00',
+                            status: 'published',
+                            views: 1245,
+                            commentCount: 18,
+                            likes: 42
+                        },
+                        {
+                            id: 102,
+                            title: 'Advanced CSS Techniques for Modern Web Design',
+                            excerpt: 'Explore cutting-edge CSS techniques including Grid, Flexbox, and CSS variables to create responsive and dynamic layouts.',
+                            publishedAt: '2023-07-05T11:15:00',
+                            status: 'published',
+                            views: 987,
+                            commentCount: 12,
+                            likes: 35
+                        },
+                        {
+                            id: 103,
+                            title: 'Optimizing Website Performance',
+                            excerpt: 'Learn strategies and best practices for improving website loading times and overall performance.',
+                            publishedAt: '2023-06-28T14:45:00',
+                            status: 'published',
+                            views: 1532,
+                            commentCount: 24,
+                            likes: 56
+                        }
+                    ],
+                    comments: [
+                        {
+                            id: 201,
+                            postId: 105,
+                            postTitle: 'Introduction to JavaScript ES6 Features',
+                            content: 'Great article! I especially found the section on destructuring assignments very helpful for my current project.',
+                            createdAt: '2023-07-12T10:20:00',
+                            status: 'approved'
+                        },
+                        {
+                            id: 202,
+                            postId: 108,
+                            postTitle: 'Building RESTful APIs with Node.js',
+                            content: 'This was exactly what I needed to understand how to structure my API endpoints. Thanks for the clear explanations!',
+                            createdAt: '2023-07-08T15:30:00',
+                            status: 'approved'
+                        },
+                        {
+                            id: 203,
+                            postId: 110,
+                            postTitle: 'Responsive Web Design Principles',
+                            content: 'I ve been struggling with media queries, but your examples made it much clearer. Could you possibly cover container queries in a future post?',
+                            createdAt: '2023-07-02T09:45:00',
+                            status: 'approved'
+                        }
+                    ],
+                    logins: [
+                        {
+                            id: 301,
+                            timestamp: '2023-07-15T14:22:00',
+                            ipAddress: '192.168.1.105',
+                            device: 'Desktop',
+                            browser: 'Chrome 114.0.5735.198',
+                            location: 'New York, USA'
+                        },
+                        {
+                            id: 302,
+                            timestamp: '2023-07-14T09:10:00',
+                            ipAddress: '192.168.1.105',
+                            device: 'Desktop',
+                            browser: 'Chrome 114.0.5735.198',
+                            location: 'New York, USA'
+                        },
+                        {
+                            id: 303,
+                            timestamp: '2023-07-12T16:45:00',
+                            ipAddress: '192.168.1.105',
+                            device: 'Desktop',
+                            browser: 'Chrome 114.0.5735.198',
+                            location: 'New York, USA'
+                        },
+                        {
+                            id: 304,
+                            timestamp: '2023-07-10T11:30:00',
+                            ipAddress: '192.168.1.105',
+                            device: 'Mobile',
+                            browser: 'Safari 16.5',
+                            location: 'New York, USA'
+                        },
+                        {
+                            id: 305,
+                            timestamp: '2023-07-08T08:15:00',
+                            ipAddress: '192.168.1.105',
+                            device: 'Tablet',
+                            browser: 'Safari 16.5',
+                            location: 'New York, USA'
+                        }
+                    ]
+                });
+
+                // Computed
+                const filteredUsers = computed(() => {
+                    let result = [...users.value];
+
+                    // Apply role filter
+                    if (filters.value.role !== 'all') {
+                        result = result.filter(user => user.role === filters.value.role);
+                    }
+
+                    // Apply status filter
+                    if (filters.value.status !== 'all') {
+                        result = result.filter(user => user.status === filters.value.status);
+                    }
+
+                    // Apply search query
+                    if (searchQuery.value) {
+                        const query = searchQuery.value.toLowerCase();
+                        result = result.filter(user =>
+                            user.name.toLowerCase().includes(query) ||
+                            user.email.toLowerCase().includes(query) ||
+                            user.role.toLowerCase().includes(query)
+                        );
+                    }
+
+                    // Sort by registration date (newest first)
+                    result.sort((a, b) => new Date(b.registeredAt) - new Date(a.registeredAt));
+
+                    return result;
+                });
+
+                const totalUsers = computed(() => filteredUsers.value.length);
+
+                const totalPages = computed(() => {
+                    return Math.ceil(totalUsers.value / itemsPerPage.value);
+                });
+
+                const paginatedUsers = computed(() => {
+                    const start = (currentPage.value - 1) * itemsPerPage.value;
+                    const end = start + itemsPerPage.value;
+                    return filteredUsers.value.slice(start, end);
+                });
+
+                const paginationStart = computed(() => {
+                    if (totalUsers.value === 0) return 0;
+                    return (currentPage.value - 1) * itemsPerPage.value + 1;
+                });
+
+                const paginationEnd = computed(() => {
+                    if (totalUsers.value === 0) return 0;
+                    return Math.min(currentPage.value * itemsPerPage.value, totalUsers.value);
+                });
+
+                const hasSelectedUsers = computed(() => {
+                    return users.value.some(user => user.selected);
+                });
+
+                const selectedCount = computed(() => {
+                    return users.value.filter(user => user.selected).length;
+                });
+
+                // Methods
+                const applyFilters = () => {
+                    currentPage.value = 1; // Reset to first page when filters change
+                };
+
+                const updatePagination = () => {
+                    currentPage.value = 1; // Reset to first page when items per page changes
+                };
+
+                const prevPage = () => {
+                    if (currentPage.value > 1) {
+                        currentPage.value--;
+                    }
+                };
+
+                const nextPage = () => {
+                    if (currentPage.value < totalPages.value) {
+                        currentPage.value++;
+                    }
+                };
+
+                const toggleSelectAll = () => {
+                    paginatedUsers.value.forEach(user => {
+                        user.selected = selectAll.value;
+                    });
+                };
+
+                const editUser = (user) => {
+                    userForm.value = {
+                        id: user.id,
+                        name: user.name,
+                        email: user.email,
+                        role: user.role,
+                        status: user.status,
+                        bio: user.bio || '',
+                        avatar: user.avatar || '',
+                        newPassword: '',
+                        confirmNewPassword: ''
+                    };
+                    showEditUserModal.value = true;
+                };
+
+                const viewUserActivity = (user) => {
+                    selectedUser.value = user;
+                    activityTab.value = 'posts';
+                    showActivityModal.value = true;
+                };
+
+                const confirmDeleteUser = (id) => {
+                    userToDeleteId.value = id;
+                    deleteMultiple.value = false;
+                    showDeleteModal.value = true;
+                };
+
+                const applyBulkAction = () => {
+                    if (!bulkAction.value) return;
+
+                    const selectedUsers = users.value.filter(user => user.selected);
+                    if (selectedUsers.length === 0) return;
+
+                    if (bulkAction.value === 'activate') {
+                        selectedUsers.forEach(user => {
+                            const index = users.value.findIndex(u => u.id === user.id);
+                            if (index !== -1) {
+                                users.value[index].status = 'active';
+                            }
+                        });
+                    } else if (bulkAction.value === 'deactivate') {
+                        selectedUsers.forEach(user => {
+                            const index = users.value.findIndex(u => u.id === user.id);
+                            if (index !== -1) {
+                                users.value[index].status = 'inactive';
+                            }
+                        });
+                    } else if (bulkAction.value === 'delete') {
+                        deleteMultiple.value = true;
+                        showDeleteModal.value = true;
+                    }
+
+                    // Reset
+                    bulkAction.value = '';
+                };
+
+                const deleteUser = () => {
+                    if (deleteMultiple.value) {
+                        // Delete multiple users
+                        users.value = users.value.filter(user => !user.selected);
+                        selectAll.value = false;
+                    } else {
+                        // Delete single user
+                        users.value = users.value.filter(user => user.id !== userToDeleteId.value);
+                    }
+
+                    showDeleteModal.value = false;
+                    userToDeleteId.value = null;
+                };
+
+                const addNewUser = () => {
+                    userForm.value = {
+                        id: null,
+                        name: '',
+                        email: '',
+                        role: 'subscriber',
+                        status: 'active',
+                        password: '',
+                        confirmPassword: '',
+                        bio: '',
+                        avatar: ''
+                    };
+                    showAddUserModal.value = true;
+                };
+
+                const closeUserModal = () => {
+                    showAddUserModal.value = false;
+                    showEditUserModal.value = false;
+                };
+
+                const saveUser = () => {
+                    // Validate form
+                    if (!userForm.value.name || !userForm.value.email) {
+                        alert('Name and email are required fields.');
+                        return;
+                    }
+
+                    if (showAddUserModal.value) {
+                        // Validate passwords for new user
+                        if (!userForm.value.password) {
+                            alert('Password is required for new users.');
+                            return;
+                        }
+
+                        if (userForm.value.password !== userForm.value.confirmPassword) {
+                            alert('Passwords do not match.');
+                            return;
+                        }
+
+                        // Create new user
+                        const newId = Math.max(0, ...users.value.map(u => u.id)) + 1;
+                        const newUser = {
+                            id: newId,
+                            name: userForm.value.name,
+                            email: userForm.value.email,
+                            role: userForm.value.role,
+                            status: userForm.value.status,
+                            avatar: userForm.value.avatar,
+                            bio: userForm.value.bio,
+                            postCount: 0,
+                            commentCount: 0,
+                            registeredAt: new Date().toISOString(),
+                            lastActiveAt: new Date().toISOString(),
+                            selected: false
+                        };
+
+                        users.value.push(newUser);
+                        showAddUserModal.value = false;
+                    } else if (showEditUserModal.value) {
+                        // Validate passwords if changing
+                        if (userForm.value.newPassword && userForm.value.newPassword !== userForm.value.confirmNewPassword) {
+                            alert('New passwords do not match.');
+                            return;
+                        }
+
+                        // Update existing user
+                        const index = users.value.findIndex(user => user.id === userForm.value.id);
+                        if (index !== -1) {
+                            users.value[index].name = userForm.value.name;
+                            users.value[index].email = userForm.value.email;
+                            users.value[index].role = userForm.value.role;
+                            users.value[index].status = userForm.value.status;
+                            users.value[index].bio = userForm.value.bio;
+                            users.value[index].avatar = userForm.value.avatar;
+                            // Password would be updated in a real application
+                        }
+
+                        showEditUserModal.value = false;
+                    }
+                };
+
+                const handleAvatarUpload = (event) => {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    // Only for demo purposes - in a real app, you would upload to server
+                    // Here we just create a local object URL
+                    if (file.type.startsWith('image/')) {
+                        userForm.value.avatar = URL.createObjectURL(file);
+                    } else {
+                        alert('Please select an image file.');
+                    }
+                };
+
+                const removeAvatar = () => {
+                    // If it's an object URL, revoke it to prevent memory leaks
+                    if (userForm.value.avatar && userForm.value.avatar.startsWith('blob:')) {
+                        URL.revokeObjectURL(userForm.value.avatar);
+                    }
+                    userForm.value.avatar = '';
+                };
+
+                const formatDate = (dateString) => {
+                    if (!dateString) return '';
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                };
+
+                const logout = () => {
+                    alert('Logout functionality will be implemented with your backend');
+                };
+
+                // Watch for changes in selection
+                watch(paginatedUsers, () => {
+                    // Update selectAll checkbox based on whether all visible users are selected
+                    selectAll.value = paginatedUsers.value.length > 0 &&
+                        paginatedUsers.value.every(user => user.selected);
+                }, { deep: true });
+
+                return {
+                    users,
+                    filters,
+                    searchQuery,
+                    currentPage,
+                    itemsPerPage,
+                    selectAll,
+                    bulkAction,
+                    showAddUserModal,
+                    showEditUserModal,
+                    showActivityModal,
+                    showDeleteModal,
+                    userForm,
+                    selectedUser,
+                    userToDeleteId,
+                    deleteMultiple,
+                    activityTab,
+                    userActivity,
+                    filteredUsers,
+                    totalUsers,
+                    totalPages,
+                    paginatedUsers,
+                    paginationStart,
+                    paginationEnd,
+                    hasSelectedUsers,
+                    selectedCount,
+                    applyFilters,
+                    updatePagination,
+                    prevPage,
+                    nextPage,
+                    toggleSelectAll,
+                    editUser,
+                    viewUserActivity,
+                    confirmDeleteUser,
+                   applyBulkAction,
+                    deleteUser,
+                    addNewUser,
+                    closeUserModal,
+                    saveUser,
+                    handleAvatarUpload,
+                    removeAvatar,
+                    formatDate,
+                    logout
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

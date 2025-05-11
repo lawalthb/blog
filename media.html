@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Library - Blog Admin</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vue 3 CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .media-item {
+            aspect-ratio: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        .media-item img {
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .media-item:hover img {
+            transform: scale(1.05);
+        }
+        .media-item .overlay {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .media-item:hover .overlay {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="min-h-screen flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-gray-800 text-white">
+            <div class="p-4 border-b border-gray-700">
+                <h2 class="text-2xl font-bold">Blog Admin</h2>
+            </div>
+            <nav class="p-2">
+                <ul>
+                    <li class="mb-1">
+                        <a href="index.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="posts.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-file-alt mr-2"></i> Posts
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="categories.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-folder mr-2"></i> Categories
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="tags.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-tags mr-2"></i> Tags
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="comments.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-comments mr-2"></i> Comments
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="media.html" class="block px-4 py-2 rounded hover:bg-gray-700 bg-gray-700">
+                            <i class="fas fa-images mr-2"></i> Media
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="users.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-users mr-2"></i> Users
+                        </a>
+                    </li>
+                
+                    <li class="mb-1">
+                        <a href="settings.html" class="block px-4 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-cog mr-2"></i> Settings
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1">
+            <!-- Header -->
+            <header class="bg-white shadow p-4 flex justify-between items-center">
+                <h1 class="text-xl font-semibold">Media Library</h1>
+                <div class="flex items-center">
+                    <span class="mr-4">Welcome, Admin</span>
+                    <button @click="logout" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                    </button>
+                </div>
+            </header>
+
+            <!-- Media Content -->
+            <div class="p-6">
+                <!-- Upload and Filters -->
+                <div class="bg-white rounded-lg shadow p-6 mb-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <button @click="showUploadModal = true" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                <i class="fas fa-upload mr-1"></i> Upload New Media
+                            </button>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-4">
+                            <div>
+                                <label for="typeFilter" class="block text-sm font-medium text-gray-700 mb-1">Media Type</label>
+                                <select id="typeFilter" v-model="filters.type" @change="applyFilters"
+                                    class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="all">All Media</option>
+                                    <option value="image">Images</option>
+                                    <option value="video">Videos</option>
+                                    <option value="audio">Audio</option>
+                                    <option value="document">Documents</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="dateFilter" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                                <select id="dateFilter" v-model="filters.date" @change="applyFilters"
+                                    class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="all">All Dates</option>
+                                    <option value="today">Today</option>
+                                    <option value="last7days">Last 7 Days</option>
+                                    <option value="last30days">Last 30 Days</option>
+                                    <option value="thisMonth">This Month</option>
+                                    <option value="lastMonth">Last Month</option>
+                                </select>
+                            </div>
+                            <div class="relative">
+                                <label for="searchMedia" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                                <input type="text" id="searchMedia" v-model="searchQuery" @input="applyFilters" placeholder="Search media..."
+                                    class="border rounded px-3 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64">
+                                <i class="fas fa-search absolute left-3 top-9 text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Media Grid -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="selectAll" v-model="selectAll" @change="toggleSelectAll"
+                                class="mr-2 rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                            <label for="selectAll" class="text-sm text-gray-700">Select All</label>
+
+                            <div v-if="hasSelectedMedia" class="ml-4 flex items-center">
+                                <select v-model="bulkAction" class="border rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                                    <option value="">Bulk Actions</option>
+                                    <option value="delete">Delete Selected</option>
+                                </select>
+                                <button @click="applyBulkAction" :disabled="!bulkAction"
+                                    class="ml-2 px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 disabled:opacity-50 text-sm">
+                                    Apply
+                                </button>
+                                <span class="ml-4 text-sm text-gray-600">{{ selectedCount }} items selected</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center">
+                            <button @click="viewMode = 'grid'" :class="{'bg-blue-100 text-blue-700': viewMode === 'grid'}"
+                                class="p-2 rounded-l border border-gray-300">
+                                <i class="fas fa-th-large"></i>
+                            </button>
+                            <button @click="viewMode = 'list'" :class="{'bg-blue-100 text-blue-700': viewMode === 'list'}"
+                                class="p-2 rounded-r border-t border-r border-b border-gray-300">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Grid View -->
+                    <div v-if="viewMode === 'grid'" class="media-grid">
+                        <div v-for="item in paginatedMedia" :key="item.id"
+                            class="media-item border rounded-lg overflow-hidden bg-gray-50 cursor-pointer"
+                            @click="selectMedia(item)">
+                            <div class="relative h-full">
+                                <img :src="item.url" :alt="item.name" class="w-full h-full">
+                                <div class="absolute inset-0 bg-black bg-opacity-50 overlay flex items-center justify-center">
+                                    <div class="text-white p-2">
+                                        <input type="checkbox" v-model="item.selected" @click.stop class="mr-2 rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                        <button @click.stop="showMediaDetails(item)" class="p-1 hover:bg-white hover:bg-opacity-20 rounded">
+                                            <i class="fas fa-info-circle"></i>
+                                        </button>
+                                        <button @click.stop="confirmDeleteMedia(item.id)" class="p-1 hover:bg-white hover:bg-opacity-20 rounded">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 text-white p-2 text-sm truncate">
+                                    {{ item.name }}
+                                </div>
+                                <div v-if="item.type !== 'image'" class="absolute top-2 right-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs">
+                                    {{ item.type.toUpperCase() }}
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="paginatedMedia.length === 0" class="col-span-full text-center py-8 text-gray-500">
+                            No media files found matching your criteria.
+                        </div>
+                    </div>
+
+                    <!-- List View -->
+                    <div v-else class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
+                                        <span class="sr-only">Select</span>
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        File
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Author
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Date
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Size
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr v-for="item in paginatedMedia" :key="item.id" :class="{'bg-blue-50': item.selected}">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <input type="checkbox" v-model="item.selected" class="rounded focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="h-10 w-10 flex-shrink-0 mr-3">
+                                                <img v-if="item.type === 'image'" :src="item.url" :alt="item.name" class="h-10 w-10 rounded object-cover">
+                                                <div v-else class="h-10 w-10 rounded bg-gray-200 flex items-center justify-center">
+                                                                                                      <i :class="[
+                                                        item.type === 'video' ? 'fas fa-video' :
+                                                        item.type === 'audio' ? 'fas fa-music' :
+                                                        item.type === 'document' ? 'fas fa-file-alt' : 'fas fa-file'
+                                                    ]" class="text-gray-500"></i>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-medium text-gray-900">{{ item.name }}</div>
+                                                <div class="text-xs text-gray-500">{{ item.type.charAt(0).toUpperCase() + item.type.slice(1) }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ item.author }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ formatDate(item.uploadedAt) }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ formatFileSize(item.size) }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <button @click="showMediaDetails(item)" class="text-blue-600 hover:text-blue-900 mr-2">
+                                            <i class="fas fa-info-circle"></i>
+                                        </button>
+                                        <button @click="copyMediaUrl(item.url)" class="text-blue-600 hover:text-blue-900 mr-2">
+                                            <i class="fas fa-link"></i>
+                                        </button>
+                                        <button @click="confirmDeleteMedia(item.id)" class="text-red-600 hover:text-red-900">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr v-if="paginatedMedia.length === 0">
+                                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                        No media files found matching your criteria.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="mt-6 flex items-center justify-between">
+                        <div>
+                            <select v-model="itemsPerPage" @change="updatePagination"
+                                class="border rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                                <option :value="12">12 per page</option>
+                                <option :value="24">24 per page</option>
+                                <option :value="48">48 per page</option>
+                                <option :value="96">96 per page</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button @click="prevPage" :disabled="currentPage === 1"
+                                class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 disabled:opacity-50 text-sm">
+                                <i class="fas fa-chevron-left mr-1"></i> Previous
+                            </button>
+                            <div class="text-sm text-gray-600">
+                                Page {{ currentPage }} of {{ totalPages }}
+                            </div>
+                            <button @click="nextPage" :disabled="currentPage === totalPages"
+                                class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 disabled:opacity-50 text-sm">
+                                Next <i class="fas fa-chevron-right ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Upload Modal -->
+        <div v-if="showUploadModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl">
+                <div class="border-b px-6 py-4 flex justify-between items-center">
+                    <h3 class="text-lg font-semibold">Upload Media</h3>
+                    <button @click="showUploadModal = false" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <div v-if="!isUploading" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                        <div class="space-y-4">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
+                            <div>
+                                <p class="text-gray-700">Drag and drop files here, or</p>
+                                <label class="mt-2 inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer">
+                                    <span>Select Files</span>
+                                    <input type="file" multiple @change="handleFileUpload" class="hidden">
+                                </label>
+                            </div>
+                            <p class="text-xs text-gray-500">
+                                Maximum upload file size: 10MB. Allowed file types: JPG, PNG, GIF, SVG, MP4, MP3, PDF, DOC, DOCX.
+                            </p>
+                        </div>
+                    </div>
+                    <div v-else>
+                        <div v-for="(file, index) in uploadQueue" :key="index" class="mb-4">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 mr-3 flex-shrink-0">
+                                    <img v-if="file.preview" :src="file.preview" class="w-10 h-10 object-cover rounded">
+                                    <div v-else class="w-10 h-10 bg-gray-200 rounded flex items-center justify-center">
+                                        <i :class="[
+                                            file.type.startsWith('video/') ? 'fas fa-video' :
+                                            file.type.startsWith('audio/') ? 'fas fa-music' :
+                                            file.type.startsWith('application/') ? 'fas fa-file-alt' : 'fas fa-file'
+                                        ]" class="text-gray-500"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-sm font-medium truncate">{{ file.name }}</span>
+                                        <span class="text-xs text-gray-500">{{ formatFileSize(file.size) }}</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-blue-500 h-2 rounded-full" :style="`width: ${file.progress}%`"></div>
+                                    </div>
+                                </div>
+                                <button @click="removeFromQueue(index)" class="ml-3 text-gray-500 hover:text-red-500">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 flex justify-end space-x-3">
+                            <button @click="cancelUpload" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
+                                Cancel
+                            </button>
+                            <button @click="processUpload" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                Upload {{ uploadQueue.length }} Files
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Media Details Modal -->
+        <div v-if="showDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl">
+                <div class="border-b px-6 py-4 flex justify-between items-center">
+                    <h3 class="text-lg font-semibold">Media Details</h3>
+                    <button @click="showDetailsModal = false" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6 flex flex-col md:flex-row">
+                    <div class="md:w-1/2 mb-4 md:mb-0 md:mr-6">
+                        <div class="bg-gray-100 rounded-lg p-2 flex items-center justify-center" style="min-height: 300px;">
+                            <img v-if="selectedMedia.type === 'image'" :src="selectedMedia.url" :alt="selectedMedia.name" class="max-w-full max-h-[300px] object-contain">
+                            <video v-else-if="selectedMedia.type === 'video'" controls class="max-w-full max-h-[300px]">
+                                <source :src="selectedMedia.url" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            <audio v-else-if="selectedMedia.type === 'audio'" controls class="w-full">
+                                <source :src="selectedMedia.url" type="audio/mpeg">
+                                Your browser does not support the audio tag.
+                            </audio>
+                            <div v-else class="text-center">
+                                <i class="fas fa-file-alt text-4xl text-gray-400 mb-2"></i>
+                                <p class="text-gray-600">Preview not available</p>
+                                <a :href="selectedMedia.url" target="_blank" class="text-blue-500 hover:underline mt-2 inline-block">
+                                    Download File
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2">
+                        <h4 class="font-medium text-lg mb-4">{{ selectedMedia.name }}</h4>
+
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Uploaded On</label>
+                                <p class="text-gray-600">{{ formatDate(selectedMedia.uploadedAt) }}</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">File Type</label>
+                                <p class="text-gray-600">{{ selectedMedia.type.charAt(0).toUpperCase() + selectedMedia.type.slice(1) }}</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">File Size</label>
+                                <p class="text-gray-600">{{ formatFileSize(selectedMedia.size) }}</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Dimensions</label>
+                                <p class="text-gray-600">{{ selectedMedia.dimensions || 'N/A' }}</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Uploaded By</label>
+                                <p class="text-gray-600">{{ selectedMedia.author }}</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">File URL</label>
+                                <div class="flex">
+                                    <input type="text" :value="selectedMedia.url" readonly class="flex-1 border rounded-l px-3 py-2 bg-gray-50 focus:outline-none">
+                                    <button @click="copyMediaUrl(selectedMedia.url)" class="bg-gray-200 px-3 py-2 rounded-r hover:bg-gray-300">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Alt Text</label>
+                                <input type="text" v-model="selectedMedia.altText" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                <textarea v-model="selectedMedia.description" rows="3" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 flex justify-end space-x-3">
+                            <button @click="confirmDeleteMedia(selectedMedia.id)" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                                Delete Permanently
+                            </button>
+                            <button @click="updateMediaDetails" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                Update
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div v-if="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-md">
+                <div class="border-b px-6 py-4">
+                    <h3 class="text-lg font-semibold">Confirm Delete</h3>
+                </div>
+                <div class="p-6">
+                    <p class="mb-4">Are you sure you want to permanently delete {{ deleteMultiple ? 'these media files' : 'this media file' }}? This action cannot be undone.</p>
+                    <div class="flex justify-end">
+                                                <button @click="showDeleteModal = false" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded mr-2">
+                            Cancel
+                        </button>
+                        <button @click="deleteMedia" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, watch } = Vue;
+
+        createApp({
+            setup() {
+                // Data
+                const mediaItems = ref([
+                    {
+                        id: 1,
+                        name: 'beach-sunset.jpg',
+                        type: 'image',
+                        url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+                        size: 1240000,
+                        dimensions: '1920 × 1080 px',
+                        author: 'Admin',
+                        uploadedAt: '2023-06-15T14:30:00',
+                        altText: 'Beautiful sunset at the beach',
+                        description: 'A stunning view of the sun setting over the ocean with golden reflections on the water.',
+                        selected: false
+                    },
+                    {
+                        id: 2,
+                        name: 'mountain-landscape.jpg',
+                        type: 'image',
+                        url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+                        size: 2350000,
+                        dimensions: '2048 × 1365 px',
+                        author: 'Admin',
+                        uploadedAt: '2023-06-14T10:15:00',
+                        altText: 'Mountain landscape with snow peaks',
+                        description: 'Majestic mountain range with snow-capped peaks and clear blue sky.',
+                        selected: false
+                    },
+                    {
+                        id: 3,
+                        name: 'city-skyline.jpg',
+                        type: 'image',
+                        url: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+                        size: 1850000,
+                        dimensions: '1800 × 1200 px',
+                        author: 'Admin',
+                        uploadedAt: '2023-06-12T16:45:00',
+                        altText: 'City skyline at night',
+                        description: 'Panoramic view of a modern city skyline at night with illuminated skyscrapers.',
+                        selected: false
+                    },
+                    {
+                        id: 4,
+                        name: 'product-demo.mp4',
+                        type: 'video',
+                        url: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4',
+                        size: 5240000,
+                        dimensions: '1280 × 720 px',
+                        author: 'Admin',
+                        uploadedAt: '2023-06-10T11:20:00',
+                        altText: 'Product demonstration video',
+                        description: 'A detailed demonstration of our new product features and benefits.',
+                        selected: false
+                    },
+                    {
+                        id: 5,
+                        name: 'interview.mp3',
+                        type: 'audio',
+                        url: 'https://sample-videos.com/audio/mp3/crowd-cheering.mp3',
+                        size: 3150000,
+                        dimensions: null,
+                        author: 'Admin',
+                        uploadedAt: '2023-06-08T09:30:00',
+                        altText: 'Interview with CEO',
+                        description: 'An exclusive interview with our CEO discussing company vision and future plans.',
+                        selected: false
+                    },
+                    {
+                        id: 6,
+                        name: 'annual-report-2023.pdf',
+                        type: 'document',
+                        url: '#',
+                        size: 4250000,
+                        dimensions: null,
+                        author: 'Admin',
+                        uploadedAt: '2023-06-05T15:10:00',
+                        altText: 'Annual Report 2023',
+                        description: 'Comprehensive annual report detailing company performance, financials, and future outlook.',
+                        selected: false
+                    },
+                    {
+                        id: 7,
+                        name: 'forest-path.jpg',
+                        type: 'image',
+                        url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+                        size: 1650000,
+                        dimensions: '1920 × 1280 px',
+                        author: 'Admin',
+                        uploadedAt: '2023-06-03T13:25:00',
+                        altText: 'Path through a lush green forest',
+                        description: 'A serene walking path through a dense, green forest with sunlight filtering through the trees.',
+                        selected: false
+                    },
+                    {
+                        id: 8,
+                        name: 'coffee-beans.jpg',
+                        type: 'image',
+                        url: 'https://images.unsplash.com/photo-1447933601403-0c6688de566e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+                        size: 950000,
+                        dimensions: '1600 × 1067 px',
+                        author: 'Admin',
+                        uploadedAt: '2023-06-01T08:45:00',
+                        altText: 'Fresh roasted coffee beans',
+                        description: 'Close-up of freshly roasted coffee beans with a rich, dark texture.',
+                        selected: false
+                    },
+                    {
+                        id: 9,
+                        name: 'marketing-strategy.docx',
+                        type: 'document',
+                        url: '#',
+                        size: 1850000,
+                        dimensions: null,
+                        author: 'Admin',
+                        uploadedAt: '2023-05-28T14:15:00',
+                        altText: 'Marketing Strategy Document',
+                        description: 'Detailed marketing strategy document outlining target audience, channels, and campaign ideas.',
+                        selected: false
+                    },
+                    {
+                        id: 10,
+                        name: 'product-launch.mp4',
+                        type: 'video',
+                        url: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4',
+                        size: 8750000,
+                        dimensions: '1920 × 1080 px',
+                        author: 'Admin',
+                        uploadedAt: '2023-05-25T16:30:00',
+                        altText: 'Product launch event video',
+                        description: 'Recording of our latest product launch event featuring presentations and demonstrations.',
+                        selected: false
+                    },
+                    {
+                        id: 11,
+                        name: 'autumn-leaves.jpg',
+                        type: 'image',
+                        url: 'https://images.unsplash.com/photo-1507783548227-544c3b8fc065?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+                        size: 1350000,
+                        dimensions: '1800 × 1200 px',
+                        author: 'Admin',
+                        uploadedAt: '2023-05-22T11:05:00',
+                        altText: 'Colorful autumn leaves',
+                        description: 'Vibrant red and orange autumn leaves covering a forest floor.',
+                        selected: false
+                    },
+                    {
+                        id: 12,
+                        name: 'podcast-episode.mp3',
+                        type: 'audio',
+                        url: 'https://sample-videos.com/audio/mp3/crowd-cheering.mp3',
+                        size: 4850000,
+                        dimensions: null,
+                        author: 'Admin',
+                        uploadedAt: '2023-05-20T09:40:00',
+                        altText: 'Podcast Episode 42',
+                        description: 'Episode 42 of our weekly podcast discussing industry trends and insights.',
+                        selected: false
+                    }
+                ]);
+
+                const filters = ref({
+                    type: 'all',
+                    date: 'all'
+                });
+
+                const searchQuery = ref('');
+                const currentPage = ref(1);
+                const itemsPerPage = ref(12);
+                const viewMode = ref('grid');
+                const selectAll = ref(false);
+                const bulkAction = ref('');
+
+                const showUploadModal = ref(false);
+                const showDetailsModal = ref(false);
+                const showDeleteModal = ref(false);
+
+                const isUploading = ref(false);
+                const uploadQueue = ref([]);
+                const selectedMedia = ref({});
+                const mediaToDeleteId = ref(null);
+                const deleteMultiple = ref(false);
+
+                // Computed
+                const filteredMedia = computed(() => {
+                    let result = [...mediaItems.value];
+
+                    // Apply type filter
+                    if (filters.value.type !== 'all') {
+                        result = result.filter(item => item.type === filters.value.type);
+                    }
+
+                    // Apply date filter
+                    if (filters.value.date !== 'all') {
+                        const now = new Date();
+                        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+                        if (filters.value.date === 'today') {
+                            result = result.filter(item => {
+                                const itemDate = new Date(item.uploadedAt);
+                                return itemDate >= today && itemDate < new Date(today.getTime() + 86400000);
+                            });
+                        } else if (filters.value.date === 'last7days') {
+                            const last7Days = new Date(today.getTime() - 6 * 86400000);
+                            result = result.filter(item => {
+                                const itemDate = new Date(item.uploadedAt);
+                                return itemDate >= last7Days;
+                            });
+                        } else if (filters.value.date === 'last30days') {
+                            const last30Days = new Date(today.getTime() - 29 * 86400000);
+                            result = result.filter(item => {
+                                const itemDate = new Date(item.uploadedAt);
+                                return itemDate >= last30Days;
+                            });
+                        } else if (filters.value.date === 'thisMonth') {
+                            const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                            result = result.filter(item => {
+                                const itemDate = new Date(item.uploadedAt);
+                                return itemDate >= firstDayOfMonth;
+                            });
+                        } else if (filters.value.date === 'lastMonth') {
+                            const firstDayOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                            const firstDayOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                            result = result.filter(item => {
+                                const itemDate = new Date(item.uploadedAt);
+                                return itemDate >= firstDayOfLastMonth && itemDate < firstDayOfThisMonth;
+                            });
+                        }
+                    }
+
+                    // Apply search query
+                    if (searchQuery.value) {
+                        const query = searchQuery.value.toLowerCase();
+                        result = result.filter(item =>
+                            item.name.toLowerCase().includes(query) ||
+                            item.description.toLowerCase().includes(query) ||
+                            item.altText.toLowerCase().includes(query)
+                        );
+                    }
+
+                    // Sort by upload date (newest first)
+                    result.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+
+                    return result;
+                });
+
+                const totalMedia = computed(() => filteredMedia.value.length);
+
+                const totalPages = computed(() => {
+                    return Math.ceil(totalMedia.value / itemsPerPage.value);
+                });
+
+                const paginatedMedia = computed(() => {
+                    const start = (currentPage.value - 1) * itemsPerPage.value;
+                    const end = start + itemsPerPage.value;
+                    return filteredMedia.value.slice(start, end);
+                });
+
+                const hasSelectedMedia = computed(() => {
+                    return mediaItems.value.some(item => item.selected);
+                });
+
+                const selectedCount = computed(() => {
+                    return mediaItems.value.filter(item => item.selected).length;
+                });
+
+                // Methods
+                const applyFilters = () => {
+                    currentPage.value = 1; // Reset to first page when filters change
+                };
+
+                const updatePagination = () => {
+                    currentPage.value = 1; // Reset to first page when items per page changes
+                };
+
+                const prevPage = () => {
+                    if (currentPage.value > 1) {
+                        currentPage.value--;
+                    }
+                };
+
+                const nextPage = () => {
+                    if (currentPage.value < totalPages.value) {
+                        currentPage.value++;
+                    }
+                };
+
+                const toggleSelectAll = () => {
+                    paginatedMedia.value.forEach(item => {
+                        item.selected = selectAll.value;
+                    });
+                };
+
+                               const selectMedia = (item) => {
+                    // Toggle selection
+                    item.selected = !item.selected;
+                };
+
+                const showMediaDetails = (item) => {
+                    selectedMedia.value = { ...item };
+                    showDetailsModal.value = true;
+                };
+
+                const updateMediaDetails = () => {
+                    const index = mediaItems.value.findIndex(item => item.id === selectedMedia.value.id);
+                    if (index !== -1) {
+                        // Update only editable fields
+                        mediaItems.value[index].altText = selectedMedia.value.altText;
+                        mediaItems.value[index].description = selectedMedia.value.description;
+                    }
+                    showDetailsModal.value = false;
+                };
+
+                const confirmDeleteMedia = (id) => {
+                    mediaToDeleteId.value = id;
+                    deleteMultiple.value = false;
+                    showDeleteModal.value = true;
+                };
+
+                const applyBulkAction = () => {
+                    if (!bulkAction.value) return;
+
+                    if (bulkAction.value === 'delete') {
+                        const selectedIds = mediaItems.value
+                            .filter(item => item.selected)
+                            .map(item => item.id);
+
+                        if (selectedIds.length === 0) return;
+
+                        deleteMultiple.value = true;
+                        showDeleteModal.value = true;
+                    }
+
+                    // Reset
+                    bulkAction.value = '';
+                };
+
+                const deleteMedia = () => {
+                    if (deleteMultiple.value) {
+                        // Delete multiple items
+                        mediaItems.value = mediaItems.value.filter(item => !item.selected);
+                        selectAll.value = false;
+                    } else {
+                        // Delete single item
+                        mediaItems.value = mediaItems.value.filter(item => item.id !== mediaToDeleteId.value);
+                    }
+
+                    showDeleteModal.value = false;
+                    showDetailsModal.value = false;
+                    mediaToDeleteId.value = null;
+                };
+
+                const copyMediaUrl = (url) => {
+                    navigator.clipboard.writeText(url)
+                        .then(() => {
+                            alert('URL copied to clipboard!');
+                        })
+                        .catch(err => {
+                            console.error('Could not copy URL: ', err);
+                        });
+                };
+
+                const handleFileUpload = (event) => {
+                    const files = event.target.files;
+                    if (!files.length) return;
+
+                    isUploading.value = true;
+
+                    // Process each file
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+
+                        // Create a preview for images
+                        let preview = null;
+                        if (file.type.startsWith('image/')) {
+                            preview = URL.createObjectURL(file);
+                        }
+
+                        // Add to upload queue
+                        uploadQueue.value.push({
+                            file,
+                            name: file.name,
+                            size: file.size,
+                            type: file.type,
+                            preview,
+                            progress: 0
+                        });
+                    }
+                };
+
+                const removeFromQueue = (index) => {
+                    // Release object URL if it exists
+                    if (uploadQueue.value[index].preview) {
+                        URL.revokeObjectURL(uploadQueue.value[index].preview);
+                    }
+
+                    // Remove from queue
+                    uploadQueue.value.splice(index, 1);
+
+                    // If queue is empty, reset upload state
+                    if (uploadQueue.value.length === 0) {
+                        isUploading.value = false;
+                    }
+                };
+
+                const cancelUpload = () => {
+                    // Release all object URLs
+                    uploadQueue.value.forEach(item => {
+                        if (item.preview) {
+                            URL.revokeObjectURL(item.preview);
+                        }
+                    });
+
+                    // Clear queue and reset state
+                    uploadQueue.value = [];
+                    isUploading.value = false;
+                    showUploadModal.value = false;
+                };
+
+                const processUpload = () => {
+                    // Simulate upload process
+                    uploadQueue.value.forEach((item, index) => {
+                        // Simulate progress updates
+                        const updateProgress = () => {
+                            item.progress += 10;
+
+                            if (item.progress < 100) {
+                                setTimeout(updateProgress, 200);
+                            } else {
+                                // Upload complete, add to media library
+                                const newId = Math.max(0, ...mediaItems.value.map(m => m.id)) + 1 + index;
+
+                                // Determine media type
+                                let type = 'document';
+                                if (item.type.startsWith('image/')) {
+                                    type = 'image';
+                                } else if (item.type.startsWith('video/')) {
+                                    type = 'video';
+                                } else if (item.type.startsWith('audio/')) {
+                                    type = 'audio';
+                                }
+
+                                // Create new media item
+                                const newMedia = {
+                                    id: newId,
+                                    name: item.name,
+                                    type: type,
+                                    url: type === 'image' ? item.preview : '#',
+                                    size: item.size,
+                                    dimensions: type === 'image' ? '1920 × 1080 px' : null,
+                                    author: 'Admin',
+                                    uploadedAt: new Date().toISOString(),
+                                    altText: '',
+                                    description: '',
+                                    selected: false
+                                };
+
+                                mediaItems.value.push(newMedia);
+
+                                // Check if all uploads are complete
+                                if (uploadQueue.value.every(u => u.progress === 100)) {
+                                    setTimeout(() => {
+                                        cancelUpload();
+                                    }, 500);
+                                }
+                            }
+                        };
+
+                        // Start progress simulation
+                        setTimeout(updateProgress, 200);
+                    });
+                };
+
+                const formatFileSize = (bytes) => {
+                    if (bytes === 0) return '0 Bytes';
+
+                    const k = 1024;
+                    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+                    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                };
+
+                const formatDate = (dateString) => {
+                    if (!dateString) return '';
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                };
+
+                const logout = () => {
+                    alert('Logout functionality will be implemented with your backend');
+                };
+
+                // Watch for changes in selection
+                watch(paginatedMedia, () => {
+                    // Update selectAll checkbox based on whether all visible media are selected
+                    selectAll.value = paginatedMedia.value.length > 0 &&
+                        paginatedMedia.value.every(item => item.selected);
+                }, { deep: true });
+
+                return {
+                    mediaItems,
+                    filters,
+                    searchQuery,
+                    currentPage,
+                    itemsPerPage,
+                    viewMode,
+                    selectAll,
+                    bulkAction,
+                    showUploadModal,
+                    showDetailsModal,
+                    showDeleteModal,
+                    isUploading,
+                    uploadQueue,
+                    selectedMedia,
+                    mediaToDeleteId,
+                    deleteMultiple,
+                    filteredMedia,
+                    totalMedia,
+                    totalPages,
+                    paginatedMedia,
+                    hasSelectedMedia,
+                    selectedCount,
+                    applyFilters,
+                    updatePagination,
+                    prevPage,
+                    nextPage,
+                    toggleSelectAll,
+                    selectMedia,
+                    showMediaDetails,
+                    updateMediaDetails,
+                    confirmDeleteMedia,
+                    applyBulkAction,
+                    deleteMedia,
+                    copyMediaUrl,
+                    handleFileUpload,
+                    removeFromQueue,
+                    cancelUpload,
+                    processUpload,
+                    formatFileSize,
+                    formatDate,
+                    logout
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
+

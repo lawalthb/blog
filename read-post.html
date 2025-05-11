@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog Admin Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vue 3 CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  </head>
+  <body class="bg-gray-100">
+    <div id="app" class="min-h-screen flex">
+      <!-- Sidebar -->
+      <aside class="w-64 bg-gray-800 text-white">
+        <div class="p-4 border-b border-gray-700">
+          <h2 class="text-2xl font-bold">Blog Admin</h2>
+        </div>
+        <nav class="p-2">
+          <ul>
+            <li class="mb-1">
+              <a
+                href="index.html"
+                class="block px-4 py-2 rounded hover:bg-gray-700 bg-gray-700">
+                <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+              </a>
+            </li>
+            <li class="mb-1">
+              <a
+                href="posts.html"
+                class="block px-4 py-2 rounded hover:bg-gray-700">
+                <i class="fas fa-file-alt mr-2"></i> Posts
+              </a>
+            </li>
+            <li class="mb-1">
+              <a
+                href="categories.html"
+                class="block px-4 py-2 rounded hover:bg-gray-700">
+                <i class="fas fa-folder mr-2"></i> Categories
+              </a>
+            </li>
+            <li class="mb-1">
+              <a
+                href="tags.html"
+                class="block px-4 py-2 rounded hover:bg-gray-700">
+                <i class="fas fa-tags mr-2"></i> Tags
+              </a>
+            </li>
+            <li class="mb-1">
+              <a
+                href="comments.html"
+                class="block px-4 py-2 rounded hover:bg-gray-700">
+                <i class="fas fa-comments mr-2"></i> Comments
+              </a>
+            </li>
+            <li class="mb-1">
+              <a
+                href="media.html"
+                class="block px-4 py-2 rounded hover:bg-gray-700">
+                <i class="fas fa-images mr-2"></i> Media
+              </a>
+            </li>
+            <li class="mb-1">
+              <a
+                href="users.html"
+                class="block px-4 py-2 rounded hover:bg-gray-700">
+                <i class="fas fa-users mr-2"></i> Users
+              </a>
+            </li>
+
+            <li class="mb-1">
+              <a
+                href="settings.html"
+                class="block px-4 py-2 rounded hover:bg-gray-700">
+                <i class="fas fa-cog mr-2"></i> Settings
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="flex-1">
+        <!-- Header -->
+        <header class="bg-white shadow p-4 flex justify-between items-center">
+          <h1 class="text-xl font-semibold">Dashboard</h1>
+          <div class="flex items-center">
+            <span class="mr-4">Welcome, Admin</span>
+            <button
+              @click="logout"
+              class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+              <i class="fas fa-sign-out-alt mr-1"></i> Logout
+            </button>
+          </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="p-6">
+          <div
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <!-- Stats Cards -->
+            <div class="bg-white rounded-lg shadow p-4 flex items-center">
+              <div class="rounded-full bg-blue-100 p-3 mr-4">
+                <i class="fas fa-file-alt text-blue-500 text-xl"></i>
+              </div>
+              <div>
+                <h3 class="text-2xl font-bold">{{ stats.posts }}</h3>
+                <p class="text-gray-500">Total Posts</p>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-4 flex items-center">
+              <div class="rounded-full bg-green-100 p-3 mr-4">
+                <i class="fas fa-comments text-green-500 text-xl"></i>
+              </div>
+              <div>
+                <h3 class="text-2xl font-bold">{{ stats.comments }}</h3>
+                <p class="text-gray-500">Comments</p>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-4 flex items-center">
+              <div class="rounded-full bg-purple-100 p-3 mr-4">
+                <i class="fas fa-users text-purple-500 text-xl"></i>
+              </div>
+              <div>
+                <h3 class="text-2xl font-bold">{{ stats.users }}</h3>
+                <p class="text-gray-500">Users</p>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-4 flex items-center">
+              <div class="rounded-full bg-yellow-100 p-3 mr-4">
+                <i class="fas fa-eye text-yellow-500 text-xl"></i>
+              </div>
+              <div>
+                <h3 class="text-2xl font-bold">{{ stats.views }}</h3>
+                <p class="text-gray-500">Total Views</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Posts -->
+          <div class="bg-white rounded-lg shadow mb-6">
+            <div class="border-b px-4 py-3 flex justify-between items-center">
+              <h2 class="text-lg font-semibold">Recent Posts</h2>
+              <a href="posts.html" class="text-blue-500 hover:underline"
+                >View All</a
+              >
+            </div>
+            <div class="p-4">
+              <table class="w-full">
+                <thead>
+                  <tr class="text-left text-gray-500 border-b">
+                    <th class="pb-2">Title</th>
+                    <th class="pb-2">Author</th>
+                    <th class="pb-2">Category</th>
+                    <th class="pb-2">Date</th>
+                    <th class="pb-2">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="post in recentPosts"
+                    :key="post.id"
+                    class="border-b">
+                    <td class="py-3 pr-2">{{ post.title }}</td>
+                    <td class="py-3 pr-2">{{ post.author }}</td>
+                    <td class="py-3 pr-2">{{ post.category }}</td>
+                    <td class="py-3 pr-2">{{ post.date }}</td>
+                    <td class="py-3">
+                      <span
+                        :class="getStatusClass(post.status)"
+                        class="px-2 py-1 rounded text-xs">
+                        {{ post.status }}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Recent Comments -->
+          <div class="bg-white rounded-lg shadow">
+            <div class="border-b px-4 py-3 flex justify-between items-center">
+              <h2 class="text-lg font-semibold">Recent Comments</h2>
+              <a href="comments.html" class="text-blue-500 hover:underline"
+                >View All</a
+              >
+            </div>
+            <div class="p-4">
+              <div
+                v-for="comment in recentComments"
+                :key="comment.id"
+                class="border-b last:border-0 py-3">
+                <div class="flex items-start">
+                  <div
+                    class="w-10 h-10 rounded-full bg-gray-300 mr-3 flex-shrink-0"></div>
+                  <div>
+                    <div class="flex items-center mb-1">
+                      <h4 class="font-medium mr-2">{{ comment.author }}</h4>
+                      <span class="text-sm text-gray-500"
+                        >on "{{ comment.post }}"</span
+                      >
+                    </div>
+                    <p class="text-gray-600 mb-2">{{ comment.content }}</p>
+                    <div class="flex text-sm">
+                      <button class="text-blue-500 hover:underline mr-3">
+                        Approve
+                      </button>
+                      <button class="text-red-500 hover:underline mr-3">
+                        Reject
+                      </button>
+                      <button class="text-gray-500 hover:underline">
+                        Reply
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      const { createApp, ref } = Vue;
+
+      createApp({
+        setup() {
+          const stats = ref({
+            posts: 125,
+            comments: 42,
+            users: 843,
+            views: 25632,
+          });
+
+          const recentPosts = ref([
+            {
+              id: 1,
+              title: "Getting Started with Vue 3",
+              author: "John Doe",
+              category: "Development",
+              date: "2023-06-15",
+              status: "published",
+            },
+            {
+              id: 2,
+              title: "Tailwind CSS Tips and Tricks",
+              author: "Jane Smith",
+              category: "Design",
+              date: "2023-06-14",
+              status: "published",
+            },
+            {
+              id: 3,
+              title: "PHP 8 New Features",
+              author: "Mike Johnson",
+              category: "Development",
+              date: "2023-06-12",
+              status: "draft",
+            },
+            {
+              id: 4,
+              title: "Responsive Design Best Practices",
+              author: "Sarah Williams",
+              category: "Design",
+              date: "2023-06-10",
+              status: "pending",
+            },
+          ]);
+
+          const recentComments = ref([
+            {
+              id: 1,
+              author: "Alex Thompson",
+              post: "Getting Started with Vue 3",
+              content: "This was really helpful, thanks for sharing!",
+              date: "2023-06-15",
+            },
+            {
+              id: 2,
+              author: "Emily Davis",
+              post: "Tailwind CSS Tips and Tricks",
+              content:
+                "I've been using Tailwind for a while now and these tips are gold!",
+              date: "2023-06-14",
+            },
+            {
+              id: 3,
+              author: "Robert Wilson",
+              post: "PHP 8 New Features",
+              content:
+                "Can't wait to try out the new match expression in PHP 8.",
+              date: "2023-06-12",
+            },
+          ]);
+
+          const getStatusClass = (status) => {
+            switch (status) {
+              case "published":
+                return "bg-green-100 text-green-800";
+              case "draft":
+                return "bg-gray-100 text-gray-800";
+              case "pending":
+                return "bg-yellow-100 text-yellow-800";
+              default:
+                return "bg-gray-100 text-gray-800";
+            }
+          };
+
+          const logout = () => {
+            alert("Logout functionality will be implemented with your backend");
+          };
+
+          return {
+            stats,
+            recentPosts,
+            recentComments,
+            getStatusClass,
+            logout,
+          };
+        },
+      }).mount("#app");
+    </script>
+  </body>
+</html>
